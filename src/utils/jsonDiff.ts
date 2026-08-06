@@ -28,10 +28,12 @@ export function compareJSON(oldObj: any, newObj: any): DiffNode {
   let hasChanges = false
 
   keys.forEach((key) => {
-    if (!(key in oldObj)) {
+    // Note: Array comparison uses this index-based order comparison as well.
+    // In this MVP, arrays are treated essentially as objects where keys are indices.
+    if (!Object.hasOwn(oldObj, key)) {
       children[key] = { type: 'added', value: newObj[key] }
       hasChanges = true
-    } else if (!(key in newObj)) {
+    } else if (!Object.hasOwn(newObj, key)) {
       children[key] = { type: 'removed', value: oldObj[key] }
       hasChanges = true
     } else {
