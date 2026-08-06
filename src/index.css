@@ -1,0 +1,67 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import 'tailwindcss';
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+
+  --color-diff-add-bg: var(--diff-add-bg);
+  --color-diff-add-text: var(--diff-add-text);
+  --color-diff-del-bg: var(--diff-del-bg);
+  --color-diff-del-text: var(--diff-del-text);
+  --color-diff-mod-bg: var(--diff-mod-bg);
+  --color-diff-mod-text: var(--diff-mod-text);
+
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+}
+
+:root {
+  --background: #121212;
+  --foreground: #d4d4d4;
+
+  --card: #1e1e1e;
+  --card-foreground: #d4d4d4;
+
+  --primary: #007acc;
+  --primary-foreground: #ffffff;
+
+  --secondary: #252526;
+  --secondary-foreground: #cccccc;
+
+  --muted: #2d2d30;
+  --muted-foreground: #858585;
+
+  --accent: #2a2d2e;
+  --accent-foreground: #ffffff;
+
+  --border: #333333;
+  --ring: #007acc;
+
+  --diff-add-bg: rgba(35, 209, 139, 0.15);
+  --diff-add-text: #23d18b;
+  --diff-del-bg: rgba(241, 76, 76, 0.15);
+  --diff-del-text: #f14c4c;
+  --diff-mod-bg: rgba(0, 122, 204, 0.15);
+  --diff-mod-text: #007acc;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}

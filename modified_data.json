@@ -1,0 +1,100 @@
+{
+    "system": {
+        "appName": "DevMate Platform NextGen",
+        "version": "2.0.0-release",
+        "environment": "production",
+        "cluster": "eu-central-1",
+        "maxConnections": 15000,
+        "maintenanceMode": false,
+        "security": {
+            "tlsVersion": "1.3",
+            "corsOrigins": [
+                "https://app.devmate.com",
+                "https://admin.devmate.com",
+                "https://staging.devmate.com"
+            ],
+            "tokenExpiryMinutes": 30,
+            "allowAnonymous": false,
+            "enableMFA": true
+        }
+    },
+    "modules": [
+        {
+            "id": "mod_01",
+            "name": "JSON Compare Tool Pro",
+            "status": "active",
+            "maxPayloadMB": 50,
+            "tags": [
+                "core",
+                "utility",
+                "v2",
+                "high-performance"
+            ],
+            "config": {
+                "timeoutMs": 1500,
+                "retryAttempts": 5
+            }
+        },
+        {
+            "id": "mod_03",
+            "name": "AI Log Analyzer",
+            "status": "active",
+            "maxPayloadMB": 100,
+            "tags": [
+                "logging",
+                "ai",
+                "nextgen"
+            ],
+            "config": {
+                "timeoutMs": 10000,
+                "retryAttempts": 3
+            }
+        }
+    ],
+    "userProfiles": [
+        {
+            "userId": "usr_1001",
+            "username": "turkoglu_dev",
+            "role": "lead_software_engineer",
+            "department": "Frontend Engineering",
+            "isActive": true,
+            "quota": {
+                "dailyRequests": 10000,
+                "usedRequests": 450
+            },
+            "preferences": {
+                "theme": "dark",
+                "fontSize": 16,
+                "notifications": {
+                    "email": true,
+                    "slack": true,
+                    "push": true
+                }
+            }
+        }
+    ],
+    "auditLogs": [
+        {
+            "id": "log_801",
+            "action": "LOGIN_SUCCESS",
+            "timestamp": "2026-08-06T10:00:00Z",
+            "ip": "192.168.1.10"
+        },
+        {
+            "id": "log_802",
+            "action": "UPDATE_PROFILE",
+            "timestamp": "2026-08-06T10:15:22Z",
+            "ip": "192.168.1.10"
+        },
+        {
+            "id": "log_804",
+            "action": "DEPLOY_PIPELINE",
+            "timestamp": "2026-08-06T12:00:00Z",
+            "ip": "10.0.0.1"
+        }
+    ],
+    "telemetry": {
+        "metricsEnabled": true,
+        "sampleRate": 0.05
+    }
+}
