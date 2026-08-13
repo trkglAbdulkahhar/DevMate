@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react'
-import { compareJSON, countDiffs, getDiffPaths, type DiffNode, type DiffType } from '../utils/jsonDiff'
+import { compareJSON, countDiffs, getDiffPaths, getModifiedFields, type DiffNode, type DiffType } from '../utils/jsonDiff'
 import {
   ArrowLeft,
   Trash2,
@@ -21,6 +21,8 @@ export function JsonCompareScreen({ onBack }: { onBack: () => void }) {
   const [diffNode, setDiffNode] = useState<DiffNode | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [stats, setStats] = useState({ added: 0, removed: 0, modified: 0 })
+  const [isAnalyzing, setIsAnalyzing] = useState(false)
+  const [aiAnalysis, setAiAnalysis] = useState<any>(null)
 
   const [activeFilter, setActiveFilter] = useState<DiffType | null>(null)
   const [activeDiffIndex, setActiveDiffIndex] = useState(0)
@@ -43,8 +45,8 @@ export function JsonCompareScreen({ onBack }: { onBack: () => void }) {
     return getDiffPaths(diffNode, activeFilter)
   }, [diffNode, activeFilter])
 
-  const activeDiffId = activeFilter && diffPaths.length > 0 
-    ? `diff-${activeFilter}-${diffPaths[activeDiffIndex]}` 
+  const activeDiffId = activeFilter && diffPaths.length > 0
+    ? `diff-${activeFilter}-${diffPaths[activeDiffIndex]}`
     : null
 
   useEffect(() => {
@@ -85,6 +87,7 @@ export function JsonCompareScreen({ onBack }: { onBack: () => void }) {
     setStats({ added: 0, removed: 0, modified: 0 })
     setActiveFilter(null)
     setActiveDiffIndex(0)
+    setAiAnalysis(null)
   }
 
   const handleSampleData = () => {
@@ -123,6 +126,7 @@ export function JsonCompareScreen({ onBack }: { onBack: () => void }) {
       const oldObj = JSON.parse(origText)
       const newObj = JSON.parse(modText)
       const diff = compareJSON(oldObj, newObj)
+      setAiAnalysis(null)
       setDiffNode(diff)
       setStats(countDiffs(diff))
       setError(null)
@@ -133,6 +137,45 @@ export function JsonCompareScreen({ onBack }: { onBack: () => void }) {
       setDiffNode(null)
     }
   }
+
+  const handleAnalyzeRisks = async () => {
+    if (!diffNode) return;
+    setIsAnalyzing(true);
+    try {
+      const requestPayload = {
+        differences: {
+          added: getDiffPaths(diffNode, 'added'),
+          removed: getDiffPaths(diffNode, 'removed'),
+          modified: getDiffPaths(diffNode, 'modified').map(path => ({
+            path, oldValue: "eski", newValue: "yeni"
+          }))
+        }
+      };
+      // const requestPayload = {
+      //   differences: {
+      //     added: getDiffPaths(diffNode, 'added'),
+      //     removed: getDiffPaths(diffNode, 'removed'),
+      //     modified: getModifiedFields(diffNode)
+      //   }
+      // }
+      const res = await fetch("http://localhost:5242/api/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(requestPayload)
+      });
+
+      // if (!res.ok) {
+      //   const errorData = await res.json();
+      //   throw new Error(errorData.detail || "API'den hata döndü!");
+      // }
+
+      const data = await res.json();
+      setAiAnalysis(data);
+    } catch (err) {
+      console.error("Ai baglanti hatasi:", err)
+    }
+    setIsAnalyzing(false);
+  };
 
   const handleDrop = (e: React.DragEvent, setter: (val: string) => void, setDragging: (val: boolean) => void) => {
     e.preventDefault()
@@ -220,17 +263,24 @@ export function JsonCompareScreen({ onBack }: { onBack: () => void }) {
           stats={stats}
           activeFilter={activeFilter}
           onFilterClick={handleFilterClick}
+          isAnalyzing={isAnalyzing}
+          onAnalyzeRisks={handleAnalyzeRisks}
+          aiAnalysis={aiAnalysis}
         />
 
         {/* Central Compare Trigger */}
         <div className="absolute bottom-8 left-0 right-80 flex justify-center pointer-events-none">
-          <button 
+          <button
             onClick={handleCompare}
             className="pointer-events-auto flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-3 rounded-full font-semibold shadow-lg shadow-primary/20 transition-transform hover:scale-105 active:scale-95 border border-primary-foreground/10 backdrop-blur-md"
           >
             <Zap className="w-4 h-4 fill-current" /> COMPARE JSON
           </button>
+
         </div>
+
+
+
 
         {/* Floating Navigation Bar */}
         {activeFilter && (

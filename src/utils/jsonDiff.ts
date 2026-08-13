@@ -59,7 +59,7 @@ export function countDiffs(node: DiffNode): { added: number; removed: number; mo
     if (n.type === 'added') counts.added++
     if (n.type === 'removed') counts.removed++
     if (n.type === 'modified' && !n.children) counts.modified++
-    
+
     if (n.children) {
       Object.values(n.children).forEach(traverse)
     }
@@ -71,7 +71,7 @@ export function countDiffs(node: DiffNode): { added: number; removed: number; mo
 
 export function getDiffPaths(node: DiffNode, targetType: DiffType, currentPath: string = 'root'): string[] {
   let paths: string[] = []
-  
+
   if (node.type === targetType && !node.children) {
     paths.push(currentPath)
   }
@@ -83,4 +83,24 @@ export function getDiffPaths(node: DiffNode, targetType: DiffType, currentPath: 
   }
 
   return paths
+}
+
+export function getModifiedFields(node: DiffNode, currentPath: string = 'root'): { path: string; oldValue: any; newValue: any }[] {
+  let fields: { path: string; oldValue: any; newValue: any }[] = []
+
+  if (node.type === 'modified' && !node.children) {
+    fields.push({
+      path: currentPath,
+      oldValue: node.oldValue,
+      newValue: node.newValue,
+    })
+  }
+
+  if (node.children) {
+    Object.entries(node.children).forEach(([key, childNode]) => {
+      fields = fields.concat(getModifiedFields(childNode, `${currentPath}.${key}`));
+    })
+  }
+
+  return fields
 }
