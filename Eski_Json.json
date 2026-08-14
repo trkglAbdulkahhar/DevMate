@@ -1,0 +1,19 @@
+{
+    "api_version": "v1.0",
+    "server": {
+        "host": "api.devmate.com",
+        "port": 443,
+        "ssl_enabled": true
+    },
+    "database": {
+        "timeout_seconds": 30
+    },
+    "features": {
+        "new_ui": false,
+        "legacy_auth": true
+    },
+    "endpoints": {
+        "getUserProfile": "/api/v1/users/{id}",
+        "deleteUser": "/api/v1/users/{id}/delete"
+    }
+}

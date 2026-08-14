@@ -141,38 +141,42 @@ export function JsonCompareScreen({ onBack }: { onBack: () => void }) {
   const handleAnalyzeRisks = async () => {
     if (!diffNode) return;
     setIsAnalyzing(true);
+    setError(null);
+    setAiAnalysis(null);
+
     try {
-      const requestPayload = {
-        differences: {
-          added: getDiffPaths(diffNode, 'added'),
-          removed: getDiffPaths(diffNode, 'removed'),
-          modified: getDiffPaths(diffNode, 'modified').map(path => ({
-            path, oldValue: "eski", newValue: "yeni"
-          }))
-        }
-      };
       // const requestPayload = {
       //   differences: {
       //     added: getDiffPaths(diffNode, 'added'),
       //     removed: getDiffPaths(diffNode, 'removed'),
-      //     modified: getModifiedFields(diffNode)
+      //     modified: getDiffPaths(diffNode, 'modified').map(path => ({
+      //       path, oldValue: "eski", newValue: "yeni"
+      //     }))
       //   }
-      // }
+      // };
+      const requestPayload = {
+        differences: {
+          added: getDiffPaths(diffNode, 'added'),
+          removed: getDiffPaths(diffNode, 'removed'),
+          modified: getModifiedFields(diffNode)
+        }
+      }
       const res = await fetch("http://localhost:5242/api/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(requestPayload)
       });
 
-      // if (!res.ok) {
-      //   const errorData = await res.json();
-      //   throw new Error(errorData.detail || "API'den hata döndü!");
-      // }
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.detail || "API'den hata döndü!");
+      }
 
       const data = await res.json();
       setAiAnalysis(data);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Ai baglanti hatasi:", err)
+      setError(err.message || "Yapay zeka analizi sırasında bir hata oluştu.");
     }
     setIsAnalyzing(false);
   };

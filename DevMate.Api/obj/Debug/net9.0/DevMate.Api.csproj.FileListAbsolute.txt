@@ -31,3 +31,5 @@ C:\Users\UnchaineD\Desktop\DevMate\DevMate.Api\obj\Debug\net9.0\refint\DevMate.A
 C:\Users\UnchaineD\Desktop\DevMate\DevMate.Api\obj\Debug\net9.0\DevMate.Api.pdb
 C:\Users\UnchaineD\Desktop\DevMate\DevMate.Api\obj\Debug\net9.0\DevMate.Api.genruntimeconfig.cache
 C:\Users\UnchaineD\Desktop\DevMate\DevMate.Api\obj\Debug\net9.0\ref\DevMate.Api.dll
+C:\Users\UnchaineD\Desktop\DevMate\DevMate.Api\bin\Debug\net9.0\DotNetEnv.dll
+C:\Users\UnchaineD\Desktop\DevMate\DevMate.Api\bin\Debug\net9.0\Superpower.dll
