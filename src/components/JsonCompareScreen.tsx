@@ -168,8 +168,21 @@ export function JsonCompareScreen({ onBack }: { onBack: () => void }) {
       });
 
       if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.detail || "API'den hata döndü!");
+        if (res.status === 429) throw new Error("Çok fazla istek attınız (Rate Limit). Lütfen biraz bekleyin.");
+        if (res.status === 413) throw new Error("Gönderdiğiniz veri çok büyük (Maks 5MB).");
+        if (res.status === 401) throw new Error("Sunucuda API kimlik doğrulama hatası (Unauthorized).");
+        if (res.status === 504) throw new Error("AI servisi zaman aşımına uğradı (Timeout). Lütfen tekrar deneyin.");
+        if (res.status === 502) throw new Error("AI servisinden geçersiz yanıt alındı (Bad Gateway).");
+        if (res.status === 500) throw new Error("Sunucu hatası oluştu (Internal Server Error).");
+        
+        let errorMessage = "API'den hata döndü!";
+        try {
+          const errorData = await res.json();
+          if (errorData?.detail) errorMessage = errorData.detail;
+        } catch {
+          // Eğer dönen yanıt JSON değilse (örneğin sadece raw status code dönmüşse) yutuyoruz.
+        }
+        throw new Error(errorMessage);
       }
 
       const data = await res.json();

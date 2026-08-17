@@ -90,7 +90,7 @@ app.MapPost("/api/analyze", async (AnalysisRequest request , HttpContext context
 
 
     var openAiRequest = new {
-        model = "llama-3.1-8b-instant",
+        model = "openai/gpt-oss-120b",
         messages = new [] {
             new { role = "system" , content = systemPrompt},
             new { role = "user" , content = $"iste JSON farkliliklari:\n{differences}"}
@@ -123,6 +123,8 @@ app.MapPost("/api/analyze", async (AnalysisRequest request , HttpContext context
 
     if(!openAiResponse.IsSuccessStatusCode)
     {
+        var errorContent = await openAiResponse.Content.ReadAsStringAsync();
+        Console.WriteLine("\n[GROQ API HATASI]: " + openAiResponse.StatusCode + " - " + errorContent + "\n");
         return Results.StatusCode(StatusCodes.Status502BadGateway);
     }
 
@@ -130,6 +132,11 @@ app.MapPost("/api/analyze", async (AnalysisRequest request , HttpContext context
     using var jsonDoc = JsonDocument.Parse(jsonString);
     var aiMessage = jsonDoc.RootElement.GetProperty("choices")
     [0].GetProperty("message").GetProperty("content").GetString();
+
+    // AI bazen inatla başına ```json ve sonuna ``` koyabilir, bunu temizleyelim:
+    if (aiMessage != null) {
+        aiMessage = aiMessage.Replace("```json", "").Replace("```", "").Trim();
+    }
 
     var options = new JsonSerializerOptions{ PropertyNameCaseInsensitive = true};
     
