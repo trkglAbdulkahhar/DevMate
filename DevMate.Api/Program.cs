@@ -59,12 +59,12 @@ app.MapPost("/api/analyze", async (AnalysisRequest request , HttpContext context
     //     Recommendations = new List<string> { "'name' alanini tamamen silmek yerine 'depracated' olarak isaretleyin"},        
     // };
 
-    if(context.Request.ContentLength > 5 * 1024 * 1024)
+    if(context.Request.ContentLength > 5 * 1024 )
         return Results.StatusCode(StatusCodes.Status413PayloadTooLarge);
 
     var apiKey = Environment.GetEnvironmentVariable("GROQ_API_KEY");
     if(string.IsNullOrEmpty(apiKey))
-        return Results.StatusCode(StatusCodes.Status401Unauthorized);
+        return Results.StatusCode(StatusCodes.Status500InternalServerError);
         
     var differences = JsonSerializer.Serialize(request.Differences);
 
@@ -142,13 +142,7 @@ app.MapPost("/api/analyze", async (AnalysisRequest request , HttpContext context
     }
 
     catch(JsonException){
-        var fallbackResponse = new AnalysisResponse {
-            RiskLevel = "Medium",
-            Summary = "AI analizi sırasında format hatası oluştu. Lütfen değişiklikleri manuel inceleyin.",
-            BreakingChanges = new List<string>(),
-            Recommendations = new List<string> { "Sistemi varsayılan güvenlik ayarlarına çekin." }
-        };
-        return Results.Ok(fallbackResponse);
+        return Results.StatusCode(StatusCodes.Status500InternalServerError);
     }
 
 }).RequireRateLimiting("IpLimit");

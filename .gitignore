@@ -28,3 +28,6 @@ notlar.txt
 
 appsettings.json
 .env
+
+bin
+obj
