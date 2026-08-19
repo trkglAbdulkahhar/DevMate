@@ -57,6 +57,13 @@ const LEVEL_CONFIG: Record<LogLevel, { color: string; bg: string; border: string
     ring: 'rgba(167,139,250,0.35)',
     dot: '#a78bfa',
   },
+  TRACE: {
+    color: '#94a3b8',
+    bg: 'rgba(148,163,184,0.1)',
+    border: 'rgba(148,163,184,0.22)',
+    ring: 'rgba(148,163,184,0.35)',
+    dot: '#94a3b8',
+  },
 }
 
 function Badge({ level }: { level: LogLevel }) {
@@ -171,7 +178,7 @@ export function LogAnalyzerScreen({ onBack }: { onBack: () => void }) {
   const [rawLog, setRawLog] = useState('')
   const [analyzed, setAnalyzed] = useState(false)
   const [entries, setEntries] = useState<LogEntry[]>([])
-  const [activeFilters, setActiveFilters] = useState<Set<LogLevel>>(new Set(['ERROR', 'WARN', 'INFO', 'DEBUG']))
+  const [activeFilters, setActiveFilters] = useState<Set<LogLevel>>(new Set(['ERROR', 'WARN', 'INFO', 'DEBUG', 'TRACE']))
   const [sourceFilter, setSourceFilter] = useState('All Sources')
   const [isAnalyzing, setIsAnalyzing] = useState(false)
 
@@ -183,7 +190,7 @@ export function LogAnalyzerScreen({ onBack }: { onBack: () => void }) {
       setEntries(parsed)
       setAnalyzed(true)
       setIsAnalyzing(false)
-      setActiveFilters(new Set(['ERROR', 'WARN', 'INFO', 'DEBUG']))
+      setActiveFilters(new Set(['ERROR', 'WARN', 'INFO', 'DEBUG', 'TRACE']))
       setSourceFilter('All Sources')
     }, 600)
   }
@@ -195,7 +202,7 @@ export function LogAnalyzerScreen({ onBack }: { onBack: () => void }) {
   }
 
   const levelCounts = useMemo(() => {
-    const counts: Record<LogLevel, number> = { ERROR: 0, WARN: 0, INFO: 0, DEBUG: 0 }
+    const counts: Record<LogLevel, number> = { ERROR: 0, WARN: 0, INFO: 0, DEBUG: 0, TRACE: 0 }
     entries.forEach((e) => {
       if(counts[e.level] !== undefined) counts[e.level]++
     })
@@ -227,7 +234,7 @@ export function LogAnalyzerScreen({ onBack }: { onBack: () => void }) {
     })
   }
 
-  const LEVELS: LogLevel[] = ['ERROR', 'WARN', 'INFO', 'DEBUG']
+  const LEVELS: LogLevel[] = ['ERROR', 'WARN', 'INFO', 'DEBUG', 'TRACE']
 
   return (
     <div className="min-h-screen bg-[#141414] font-sans flex flex-col">
