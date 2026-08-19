@@ -8,7 +8,7 @@ import {
   User
 } from 'lucide-react'
 
-export function Dashboard({ onSelectCompare }: { onSelectCompare: () => void }) {
+export function Dashboard({ onSelectCompare, onSelectLogAnalyzer }: { onSelectCompare: () => void, onSelectLogAnalyzer: () => void }) {
   return (
     <div className="flex-1 flex flex-col">
       <header className="h-16 border-b border-border bg-card flex items-center justify-between px-6">
@@ -44,17 +44,24 @@ export function Dashboard({ onSelectCompare }: { onSelectCompare: () => void }) 
             </div>
           </button>
 
-          {/* Disabled Card: Log Analyzer */}
-          <div className="relative flex flex-col bg-[#1a2b21] border border-[#23d18b]/20 rounded-2xl p-10 min-h-[300px] opacity-60 cursor-not-allowed">
-            <div className="absolute top-6 right-6 bg-background/80 backdrop-blur-sm border border-border px-3 py-1.5 rounded-md text-xs font-bold text-muted-foreground tracking-wider uppercase">
-              404 / Soon
+          {/* Active Card: Log Analyzer */}
+          <button
+            onClick={onSelectLogAnalyzer}
+            className="group relative flex flex-col text-left bg-[#1a2b21] border border-[#23d18b]/30 rounded-2xl p-10 min-h-[300px] hover:border-[#23d18b] transition-all hover:shadow-[0_0_20px_rgba(35,209,139,0.1)] overflow-hidden"
+          >
+            <div className="absolute top-0 right-0 w-32 h-32 bg-[#23d18b]/10 rounded-full blur-3xl -mr-10 -mt-10 transition-transform group-hover:scale-110" />
+            <div className="absolute top-6 right-6 bg-background/80 backdrop-blur-sm border border-[#23d18b]/40 px-3 py-1.5 rounded-md text-xs font-bold text-[#23d18b] tracking-wider uppercase">
+              NEW
             </div>
-            <div className="w-14 h-14 rounded-xl bg-[#1f3d2d] border border-[#23d18b]/30 flex items-center justify-center mb-8">
+            <div className="w-14 h-14 rounded-xl bg-[#1f3d2d] border border-[#23d18b]/40 flex items-center justify-center mb-8 z-10">
               <TerminalSquare className="w-6 h-6 text-[#23d18b]" />
             </div>
-            <h3 className="text-lg font-medium text-[#23d18b] mb-2">AI Log Analyzer</h3>
-            <p className="text-[#7ea892] text-sm">Ingest, parse, and identify anomalies in application logs using local AI models.</p>
-          </div>
+            <h3 className="text-lg font-medium text-[#23d18b] mb-2 z-10 group-hover:text-[#3ceb9d] transition-colors">AI Log Analyzer</h3>
+            <p className="text-[#7ea892] text-sm z-10">Ingest, parse, and identify anomalies in application logs using local AI models.</p>
+            <div className="mt-6 flex items-center text-[#23d18b] text-sm font-medium z-10 opacity-0 group-hover:opacity-100 transition-opacity -translate-x-2 group-hover:translate-x-0">
+              Launch Workspace <ChevronRight className="w-4 h-4 ml-1" />
+            </div>
+          </button>
 
           {/* Disabled Card: JWT Decoder */}
           <div className="relative flex flex-col bg-[#1a252b] border border-[#007acc]/20 rounded-2xl p-10 min-h-[300px] opacity-60 cursor-not-allowed">

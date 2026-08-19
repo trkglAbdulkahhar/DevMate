@@ -56,6 +56,27 @@
   --diff-del-text: #f14c4c;
   --diff-mod-bg: rgba(0, 122, 204, 0.15);
   --diff-mod-text: #007acc;
+
+  /* Log Analyzer Colors */
+  --neon-blue: #4fc3f7;
+  --neon-blue-dim: rgba(79, 195, 247, 0.12);
+  --neon-blue-glow: rgba(79, 195, 247, 0.25);
+
+  --error-color: #f87171;
+  --error-bg: rgba(248, 113, 113, 0.1);
+  --error-border: rgba(248, 113, 113, 0.25);
+
+  --warn-color: #fbbf24;
+  --warn-bg: rgba(251, 191, 36, 0.1);
+  --warn-border: rgba(251, 191, 36, 0.25);
+
+  --info-color: #4fc3f7;
+  --info-bg: rgba(79, 195, 247, 0.1);
+  --info-border: rgba(79, 195, 247, 0.25);
+
+  --debug-color: #a78bfa;
+  --debug-bg: rgba(167, 139, 250, 0.1);
+  --debug-border: rgba(167, 139, 250, 0.25);
 }
 
 body {
