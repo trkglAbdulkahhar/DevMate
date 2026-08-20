@@ -70,6 +70,15 @@ export function LogAnalyzerScreen({ onBack }: { onBack: () => void }) {
     }, 600)
   }
 
+  const handleClear = () => {
+    setRawLog('')
+    setAnalyzed(false)
+    setEntries([])
+    setAiResult(null)
+    setIsAnalyzing(false)
+    setIsAiAnalyzing(false)
+  }
+
   const handleLoadSample = () => {
     setRawLog(SAMPLE_LOG)
     setAnalyzed(false)
@@ -208,12 +217,20 @@ export function LogAnalyzerScreen({ onBack }: { onBack: () => void }) {
               <span className="text-[11px] text-[#6a6a6a] font-mono ml-1.5">
                 application.log
               </span>
-              <button
-                onClick={handleLoadSample}
-                className="ml-auto text-[10px] text-[#4fc3f7] bg-[#4fc3f7]/10 border border-[#4fc3f7]/20 rounded px-2.5 py-1 cursor-pointer font-mono tracking-[0.04em] transition-all duration-150 hover:bg-[#4fc3f7]/20"
-              >
-                Load sample
-              </button>
+              <div className="ml-auto flex items-center gap-2">
+                <button
+                  onClick={handleClear}
+                  className="text-[10px] text-[#f87171] bg-[#f87171]/10 border border-[#f87171]/20 rounded px-2.5 py-1 cursor-pointer font-mono tracking-[0.04em] transition-all duration-150 hover:bg-[#f87171]/20"
+                >
+                  Clear
+                </button>
+                <button
+                  onClick={handleLoadSample}
+                  className="text-[10px] text-[#4fc3f7] bg-[#4fc3f7]/10 border border-[#4fc3f7]/20 rounded px-2.5 py-1 cursor-pointer font-mono tracking-[0.04em] transition-all duration-150 hover:bg-[#4fc3f7]/20"
+                >
+                  Load sample
+                </button>
+              </div>
             </div>
 
             <div className="relative">
