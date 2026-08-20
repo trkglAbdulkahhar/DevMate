@@ -79,16 +79,16 @@ Caused by: java.sql.SQLIntegrityConstraintViolationException: Duplicate entry
       expect(e.fullStackTrace).toHaveLength(7) // All stack trace lines
     })
 
-    it('should truncate stack trace if it exceeds 1000 lines', () => {
-      // Create a log with a 1005 line stack trace
+    it('should truncate stack trace if it exceeds 200 lines', () => {
+      // Create a log with a 205 line stack trace
       let raw = '2026-08-18 10:00:00 [ERROR] [App] - Massive Error\n'
-      for (let i = 0; i < 1005; i++) {
+      for (let i = 0; i < 205; i++) {
         raw += '\tat some.deep.CallStack(CallStack.java:10)\n'
       }
 
       const entries = parseLogs(raw)
       expect(entries).toHaveLength(1)
-      expect(entries[0].fullStackTrace.length).toBeLessThanOrEqual(1000)
+      expect(entries[0].fullStackTrace.length).toBe(200)
       expect(entries[0].isTruncated).toBe(true)
     })
     

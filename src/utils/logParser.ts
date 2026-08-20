@@ -56,36 +56,40 @@ export function parseLogs(raw: string): LogEntry[] {
     let isTruncated = false
 
     // İç döngü (Lookahead): Logun devamı (stack trace) varsa topla.
-    // Çok uzun stack trace'ler için maksimum 1000 satırlık bir güvenlik sınırı (Safety Limit) koyduk.
+    // Çok uzun stack trace'ler için maksimum 200 satırlık bir güvenlik sınırı (Safety Limit) koyduk.
     let j = i + 1;
-    for (; j < Math.min(i + 1000, lines.length); j++) {
+    let traceCount = 0;
+    
+    while (j < lines.length && traceCount < 200) {
       const next = lines[j].trim()
-
+      
       // Yeni bir log başladıysa (Header Pattern eşleşirse) alt satırları taramayı bırak
       if (next && isNewLogEntry(next)) break
-
+      
+      traceCount++; // Sadece loga ait olan satırları sayıyoruz
+      
       if (!next) {
         fullStackTrace.push("")
-        continue
-      }
+      } else {
+        fullStackTrace.push(next)
 
-      fullStackTrace.push(next)
+        // 1. Top Level Exception arayışı (İlk bulunan alınır)
+        if (!topLevelException && /^[a-zA-Z][\w.]+(Exception|Error)/.test(next)) {
+          const colonIdx = next.indexOf(':')
+          topLevelException = colonIdx > -1 ? next.substring(0, colonIdx) : next;
+          topLevelExceptionMessage = next;
+        }
 
-      // 1. Top Level Exception arayışı (İlk bulunan alınır)
-      if (!topLevelException && /^[a-zA-Z][\w.]+(Exception|Error)/.test(next)) {
-        const colonIdx = next.indexOf(':')
-        topLevelException = colonIdx > -1 ? next.substring(0, colonIdx) : next;
-        topLevelExceptionMessage = next;
+        // 2. Caused by arayışı (Gördükçe üzerine yazılır, en sonuncu en derindeki kalır)
+        if (next.startsWith('Caused by: ')) {
+          lastCausedBy = next.replace('Caused by:', '').trim()
+        }
       }
-
-      // 2. Caused by arayışı (Gördükçe üzerine yazılır, en sonuncu en derindeki kalır)
-      if (next.startsWith('Caused by: ')) {
-        lastCausedBy = next.replace('Caused by:', '').trim()
-      }
+      j++;
     }
 
-    // 1000 satır sınırına ulaşıldıysa truncated (yarıda kesildi) flag'ini yak
-    if (j === Math.min(i + 1000, lines.length) && j < lines.length && !isNewLogEntry(lines[j].trim())) {
+    // Eğer tam 200 satır okuduk ve bir sonraki satır hala yeni bir log değilse, demek ki log devam ediyordu (kesildi)
+    if (j < lines.length && lines[j].trim() !== '' && !isNewLogEntry(lines[j].trim())) {
       isTruncated = true;
     }
 

@@ -44,9 +44,31 @@ export function LogCard({ entry }: { entry: LogEntry }) {
           <div className="text-[10px] text-[#5a5a5a] mb-1.5 uppercase tracking-[0.08em]">
             Full Source Path
           </div>
-          <code className="text-[11px] text-[#4fc3f7] font-mono break-all">
+          <code className="text-[11px] text-[#4fc3f7] font-mono break-all mb-3 block">
             {entry.source}
           </code>
+
+          {entry.fullStackTrace && entry.fullStackTrace.length > 0 && (
+            <>
+              <div className="text-[10px] text-[#5a5a5a] mb-1.5 mt-3 uppercase tracking-[0.08em]">
+                Stack Trace Context
+              </div>
+              <div className="bg-[#0a0a0a] rounded border border-[#1e1e1e] p-2.5 max-h-[250px] overflow-y-auto">
+                <code className="text-[11px] text-[#c8c8c8] font-mono whitespace-pre block">
+                  {entry.fullStackTrace.join('\n')}
+                </code>
+              </div>
+            </>
+          )}
+
+          {entry.isTruncated && (
+            <div className="mt-2.5 bg-orange-500/10 border border-orange-500/30 rounded px-2.5 py-1.5 flex items-start gap-2">
+              <span className="text-orange-400 mt-0.5">⚠️</span>
+              <p className="text-[11px] text-orange-200/80 leading-relaxed font-sans">
+                <strong>Warning:</strong> This stack trace was truncated at 200 lines for performance reasons. The deepest root cause may not be visible.
+              </p>
+            </div>
+          )}
         </div>
       )}
 
