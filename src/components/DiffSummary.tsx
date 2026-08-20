@@ -14,7 +14,7 @@ interface DiffSummaryProps {
 
 export function DiffSummary({ error, stats, activeFilter, onFilterClick, isAnalyzing, onAnalyzeRisks, aiAnalysis }: DiffSummaryProps) {
   return (
-    <div className="w-80 bg-card flex flex-col shrink-0">
+    <div className="w-[27%] bg-card flex flex-col shrink-0">
       <div className="h-10 border-b border-border flex items-center px-4 shrink-0">
         <span className="text-xs font-medium text-foreground uppercase tracking-wider">Comparison Summary</span>
       </div>
@@ -85,9 +85,6 @@ export function DiffSummary({ error, stats, activeFilter, onFilterClick, isAnaly
                 <h3 className="font-bold text-sm text-[#d7ba7d] flex items-center gap-2">
                   <ShieldAlert className="w-4 h-4" /> AI Risk Analysis
                 </h3>
-                <span className={`px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest rounded ${aiAnalysis.riskLevel === 'High' ? 'bg-red-500/20 text-red-500' : 'bg-yellow-500/20 text-yellow-500'}`}>
-                  {aiAnalysis.riskLevel} RİSK
-                </span>
               </div>
 
               <p className="text-xs text-muted-foreground leading-relaxed">

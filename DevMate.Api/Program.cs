@@ -22,8 +22,8 @@ builder.Services.AddRateLimiter(options =>{
         var clientIp = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
         return RateLimitPartition.GetFixedWindowLimiter(clientIp, _ => 
         new FixedWindowRateLimiterOptions{
-            PermitLimit = 1,
-            Window = TimeSpan.FromSeconds(30),
+            PermitLimit = 30,
+            Window = TimeSpan.FromDays(1),
             QueueLimit = 0
         });
     });
@@ -73,14 +73,12 @@ app.MapPost("/api/analyze", async (AnalysisRequest request , HttpContext context
     
     KURALLAR:
     1. Ezbere veya basmakalıp cümleler kurma. Her bir değişikliğin arka planında ne yatabileceğini, sistemin diğer parçalarını (eski istemciler, veritabanı, güvenlik katmanları) nasıl etkileyebileceğini kendi mühendislik zekanla analiz et.
-    2. 'RiskLevel' alanını, yaptığın analizin ciddiyetine göre 'High', 'Medium' veya 'Low' olarak belirle.
-    3. 'Summary' (Özet) kısmında; sistemde nelerin değişip nelerin değişmediğini, bu versiyon geçişinin genel olarak neyi amaçladığını anlatan akıcı bir özet yaz.
-    4. 'BreakingChanges' (Kırılmalar) kısmında; sistemin çökmesine veya hata vermesine yol açabilecek kritik değişiklikleri yorumla. Sadece alan isimlerini listeleme, bu değişikliğin arka planda neyi bozabileceğini (Örn: silinen bir alan yüzünden yetkilendirme veya loglama mekanizmalarının nasıl hata verebileceğini) kendi zekanla kurgula ve anlat.
-    5. 'Recommendations' (Öneriler) kısmında; yapıcı ve modern mimari çözümler üret. Örneğin silinen bir özellik varsa, bunun yerine verilerin nereye taşınabileceğini, yeni mimarinin nasıl kurgulanabileceğini veya geriye dönük uyumluluğun (backward compatibility) nasıl sağlanabileceğini kendi uzmanlığınla tavsiye et.
+    2. 'Summary' (Özet) kısmında; sistemde nelerin değişip nelerin değişmediğini, bu versiyon geçişinin genel olarak neyi amaçladığını anlatan akıcı bir özet yaz.
+    3. 'BreakingChanges' (Kırılmalar) kısmında; sistemin çökmesine veya hata vermesine yol açabilecek kritik değişiklikleri yorumla. Sadece alan isimlerini listeleme, bu değişikliğin arka planda neyi bozabileceğini (Örn: silinen bir alan yüzünden yetkilendirme veya loglama mekanizmalarının nasıl hata verebileceğini) kendi zekanla kurgula ve anlat.
+    4. 'Recommendations' (Öneriler) kısmında; yapıcı ve modern mimari çözümler üret. Örneğin silinen bir özellik varsa, bunun yerine verilerin nereye taşınabileceğini, yeni mimarinin nasıl kurgulanabileceğini veya geriye dönük uyumluluğun (backward compatibility) nasıl sağlanabileceğini kendi uzmanlığınla tavsiye et.
     
     BİREBİR aşağıdaki JSON formatında, Markdown karakterleri (```json) kullanmadan, sadece ham JSON objesi olarak Türkçe cevap dön:
     {
-        ""RiskLevel"": ""High"",
         ""Summary"": ""..."",
         ""BreakingChanges"": [""..."", ""...""],
         ""Recommendations"": [""..."", ""...""]
@@ -151,6 +149,87 @@ app.MapPost("/api/analyze", async (AnalysisRequest request , HttpContext context
     catch(JsonException){
         return Results.StatusCode(StatusCodes.Status500InternalServerError);
     }
+
+}).RequireRateLimiting("IpLimit");
+
+
+app.MapPost("/api/logs/analyze-batch", async (LogBatchAnalysisRequest request, HttpContext context) =>{
+    if (context.Request.ContentLength > 5 * 1024 * 1024)
+        return Results.StatusCode(StatusCodes.Status413PayloadTooLarge);
+    
+    var apiKey = Environment.GetEnvironmentVariable("GROQ_API_KEY");
+    if(string.IsNullOrEmpty(apiKey))
+        return Results.StatusCode(StatusCodes.Status500InternalServerError);
+
+    var LogJson = JsonSerializer.Serialize(request.Logs);
+
+    var SystemPrompt = @"Sen üst düzey bir DevOps ve Backend Mimarı uzmanısın.
+        Amacın sana gönderilen uygulama loglarını topluca analiz edip kök nedenleri ve çözüm önerilerini bulmaktır.
+        KURALLAR:
+        1. Gelen logları inceleyerek sistemdeki temel sorunları (Key Issues) tespit et.
+        2. 'OverallSummary' alanında sistemin genel durumunu ve sorunların özetini akıcı bir dille anlat.
+        3. 'KeyIssues' listesinde her bir belirgin sorun için anlaşılır bir 'title' (Başlık), sorunun teknik detayını anlatan 'rootCause' (Kök Neden) ve adım adım 'solution' (Çözüm) üret.
+        4. Ezbere konuşma, stack trace ve hata mesajlarındaki detayları (örneğin NullPointerException nereden fırlamış, veritabanı havuzu neden dolmuş) kullanarak nokta atışı analiz yap.
+        BİREBİR aşağıdaki JSON formatında, Markdown karakterleri (```json) kullanmadan, sadece ham JSON objesi olarak Türkçe cevap dön:
+        {
+          ""overallSummary"": ""..."",
+          ""keyIssues"": [
+            {
+              ""title"": ""..."",
+              ""rootCause"": ""..."",
+              ""solution"": ""...""
+            }
+          ]
+        }";
+
+    var openAiRequest = new {
+        model = "openai/gpt-oss-120b",
+        messages = new[] {
+            new { role = "system", content = SystemPrompt},
+            new { role = "user", content = $"Iste analiz edilecek loglar:\n{LogJson}"}
+        },
+        response_format = new { type = "json_object"},
+        temperature = 0.2
+    };
+
+    using var httpClient = new HttpClient();
+    httpClient.Timeout = TimeSpan.FromSeconds(45);
+    httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiKey}");
+
+    var content = new StringContent(JsonSerializer.Serialize(openAiRequest), Encoding.UTF8, "application/json");
+    HttpResponseMessage openAiResponse;
+
+    try{
+        openAiResponse = await 
+        httpClient.PostAsync("https://api.groq.com/openai/v1/chat/completions", content);
+    } catch(TaskCanceledException){
+        return Results.StatusCode(StatusCodes.Status504GatewayTimeout);    
+    }
+
+    if (!openAiResponse.IsSuccessStatusCode){
+        var errorContent = await openAiResponse.Content.ReadAsStringAsync();
+        Console.WriteLine("\n[GROQ API HATASI]: " + openAiResponse.StatusCode + " - " + errorContent + "\n");
+        return Results.StatusCode(StatusCodes.Status502BadGateway);
+    }
+
+    var jsonString = await openAiResponse.Content.ReadAsStringAsync();
+    using var jsonDoc = JsonDocument.Parse(jsonString);
+    var aiMessage = jsonDoc.RootElement.GetProperty("choices")[0].GetProperty("message").GetProperty("content").GetString();
+
+    if(aiMessage != null){
+        aiMessage = aiMessage.Replace("```json", "").Replace("```", "").Trim(); 
+    }
+
+    var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+
+    try{
+        var finalResponse = JsonSerializer.Deserialize<LogAnalysisResponse>(aiMessage!, options);
+        if(finalResponse == null) throw new JsonException();
+        return Results.Ok(finalResponse);
+    } catch (JsonException){
+        return Results.StatusCode(StatusCodes.Status500InternalServerError);
+    }  
+
 
 }).RequireRateLimiting("IpLimit");
 
