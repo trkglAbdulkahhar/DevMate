@@ -2,13 +2,14 @@ namespace DevMate.Api.Models;
 
 public class LogEntryDto{
     public double Id { get; set; }
-    public string Timestamp { get; set; } = string.Empty;
     public string Level { get; set; } = string.Empty;
+    public string Timestamp { get; set; } = string.Empty;
     public string Source { get; set; } = string.Empty;
-    public string Message { get; set; } = string.Empty;
     public string? ExceptionType { get; set; } 
     public string? RootCause { get; set; } 
     public List<string>? FullStackTrace { get; set; }
+    public bool IsTruncated { get; set; }
+    public string Raw { get; set; } = string.Empty;
 }
 
 public class LogBatchAnalysisRequest{

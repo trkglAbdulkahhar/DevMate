@@ -62,7 +62,7 @@ export function LogAnalyzerScreen({ onBack }: { onBack: () => void }) {
       setIsAnalyzing(false)
       setActiveFilters(new Set(['ERROR', 'WARN', 'INFO', 'DEBUG', 'TRACE']))
       setSourceFilter('All Sources')
-      
+
       // Reset AI panel on new parse
       setAiResult(null)
       setIsAiAnalyzing(false)
@@ -133,11 +133,15 @@ export function LogAnalyzerScreen({ onBack }: { onBack: () => void }) {
       alert("Please select at least one log level to analyze.");
       return;
     }
-    
-    const logsToSend = entries.filter(e => selectedAiLevels.has(e.level));
+
+    const logsToSend = entries.filter(e => selectedAiLevels.has(e.level)).slice(0, 50);
     if (logsToSend.length === 0) {
       alert("No logs found for the selected levels.");
       return;
+    }
+
+    if (entries.filter(e => selectedAiLevels.has(e.level)).length > 50) {
+      alert("Token sinirlarini asmamak icin en gucnel 50 log yapay zekaya gonderiliyor.")
     }
 
     setIsAiAnalyzing(true);
@@ -202,10 +206,10 @@ export function LogAnalyzerScreen({ onBack }: { onBack: () => void }) {
       </header>
 
       <main className="flex-1 p-6 max-w-[1800px] w-full mx-auto flex gap-6 items-start">
-        
+
         {/* SOL TARAF (%70) - Ham Loglar ve Filtreler */}
         <div className="flex-1 flex flex-col gap-4 min-w-0">
-          
+
           {/* Top Section — Editor */}
           <section className="bg-[#1e1e1e] border border-[#2a2a2a] rounded-lg overflow-hidden shrink-0">
             <div className="px-3.5 py-2 border-b border-[#252526] flex items-center gap-2 bg-[#252526]">
@@ -357,8 +361,8 @@ export function LogAnalyzerScreen({ onBack }: { onBack: () => void }) {
                 AI Insights
               </h3>
               {aiResult && (
-                <button 
-                  onClick={() => setAiResult(null)} 
+                <button
+                  onClick={() => setAiResult(null)}
                   className="ml-auto text-[10px] text-[#858585] hover:text-white transition-colors"
                 >
                   Reset
@@ -387,9 +391,9 @@ export function LogAnalyzerScreen({ onBack }: { onBack: () => void }) {
                       {aiResult.overallSummary}
                     </p>
                   </div>
-                  
+
                   <div className="h-[1px] w-full bg-[#2a2a2a]" />
-                  
+
                   <div>
                     <h4 className="text-[10px] text-[#5a5a5a] uppercase tracking-[0.1em] mb-3 font-mono">
                       Key Issues Found
@@ -402,7 +406,7 @@ export function LogAnalyzerScreen({ onBack }: { onBack: () => void }) {
                             {issue.title}
                           </h5>
                           <div className="mb-2.5">
-                            <span className="text-[10px] text-[#858585] font-mono block mb-0.5">ROOT CAUSE</span>
+                            <span className="text-[10px] text-[#858585] font-mono block mb-0.5">POSSIBLE ROOT CAUSE</span>
                             <p className="text-[12px] text-[#c8c8c8] leading-relaxed">
                               {issue.rootCause}
                             </p>
@@ -432,8 +436,8 @@ export function LogAnalyzerScreen({ onBack }: { onBack: () => void }) {
                     {LEVELS.map(lvl => (
                       <label key={lvl} className="flex items-center gap-2.5 cursor-pointer group w-fit">
                         <div className="relative flex items-center justify-center">
-                          <input 
-                            type="checkbox" 
+                          <input
+                            type="checkbox"
                             checked={selectedAiLevels.has(lvl)}
                             onChange={() => toggleAiLevel(lvl)}
                             className="w-3.5 h-3.5 rounded-sm border-[#3e3e3e] bg-[#1e1e1e] appearance-none cursor-pointer peer checked:bg-purple-500 checked:border-purple-500 transition-colors"
