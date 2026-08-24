@@ -1,0 +1,130 @@
+2026-08-18 14:45:01.102 [INFO]  [PaymentGatewayApp] [Thread-12] [c.d.s.OrderProcessingService] - Incoming order processing request received. OrderId: ORD-99281, CustomerId: CUST-4410
+2026-08-18 14:45:01.105 [DEBUG] [PaymentGatewayApp] [Thread-12] [c.d.s.InventoryService] - Checking inventory stock for SKU-88219 (Quantity: 2)
+2026-08-18 14:45:01.120 [INFO]  [PaymentGatewayApp] [Thread-12] [c.d.s.InventoryService] - Stock reserved successfully. ReservationId: RSV-33019
+2026-08-18 14:45:01.122 [DEBUG] [PaymentGatewayApp] [Thread-12] [c.d.s.PaymentService] - Dispatching payment request to external provider. Provider: Iyzico, Amount: 1450.50 TRY
+2026-08-18 14:45:01.450 [INFO]  [PaymentGatewayApp] [Thread-12] [c.d.s.PaymentService] - Payment transaction authorized. TxnId: TXN-88192019
+2026-08-18 14:45:01.452 [INFO]  [PaymentGatewayApp] [Thread-12] [c.d.s.OrderProcessingService] - Order ORD-99281 completed successfully in 350ms.
+2026-08-18 14:45:05.210 [INFO]  [AuthService] [Thread-8] [c.d.a.JwtAuthenticationFilter] - User authentication requested for username: abdulkahhar.turkoglu
+2026-08-18 14:45:05.245 [DEBUG] [AuthService] [Thread-8] [c.d.a.JwtTokenProvider] - Validating JWT signature and claims for subject: abdulkahhar.turkoglu
+2026-08-18 14:45:05.250 [INFO]  [AuthService] [Thread-8] [c.d.a.JwtAuthenticationFilter] - Authentication successful. Assigned roles: [ROLE_DEVELOPER, ROLE_ADMIN]
+2026-08-18 14:45:10.005 [INFO]  [DatabasePool] [HikariCP-Worker-1] [c.z.h.p.HikariPool] - Active connections: 4, Idle connections: 16, Total: 20
+2026-08-18 14:45:12.319 [WARN]  [ApiGateway] [Reactor-Netty-3] [c.d.g.f.RateLimitingFilter] - Rate limit threshold warning: Client IP 192.168.1.105 reached 85% of allowed limit (85/100 req/min).
+2026-08-18 14:45:18.701 [INFO]  [JsonCompareWorker] [Thread-19] [c.d.d.JsonDiffController] - Processing diff comparison between original payload (size: 42KB) and modified payload (size: 44KB)
+2026-08-18 14:45:18.788 [INFO]  [JsonCompareWorker] [Thread-19] [c.d.d.JsonDiffService] - Diff calculation completed. Additions: 4, Deletions: 1, Modifications: 3
+2026-08-18 14:45:22.010 [INFO]  [PaymentGatewayApp] [Thread-14] [c.d.s.OrderProcessingService] - Incoming order processing request received. OrderId: ORD-99282, CustomerId: CUST-5192
+2026-08-18 14:45:22.015 [DEBUG] [PaymentGatewayApp] [Thread-14] [c.d.s.InventoryService] - Checking inventory stock for SKU-10492 (Quantity: 1)
+2026-08-18 14:45:22.030 [INFO]  [PaymentGatewayApp] [Thread-14] [c.d.s.InventoryService] - Stock reserved successfully. ReservationId: RSV-33020
+2026-08-18 14:45:22.035 [DEBUG] [PaymentGatewayApp] [Thread-14] [c.d.s.PaymentService] - Dispatching payment request to external provider. Provider: GarantiPos, Amount: 3200.00 TRY
+2026-08-18 14:45:25.040 [WARN]  [PaymentGatewayApp] [Thread-14] [c.d.s.PaymentService] - External payment gateway response delayed. Elapsed time: 3005ms
+2026-08-18 14:45:27.042 [ERROR] [PaymentGatewayApp] [Thread-14] [c.d.s.PaymentService] - Payment processing failed due to remote socket timeout.
+java.net.SocketTimeoutException: Read timed out
+	at java.base/sun.nio.ch.NioSocketImpl.timedRead(NioSocketImpl.java:288)
+	at java.base/sun.nio.ch.NioSocketImpl.implRead(NioSocketImpl.java:314)
+	at java.base/sun.nio.ch.NioSocketImpl.read(NioSocketImpl.java:355)
+	at java.base/sun.nio.ch.NioSocketImpl$1.read(NioSocketImpl.java:808)
+	at java.base/java.net.Socket$SocketInputStream.read(Socket.java:1012)
+	at org.apache.http.impl.io.AbstractSessionInputBuffer.fillBuffer(AbstractSessionInputBuffer.java:161)
+	at org.apache.http.impl.io.SocketInputBuffer.fillBuffer(SocketInputBuffer.java:82)
+	at org.apache.http.impl.io.AbstractSessionInputBuffer.readLine(AbstractSessionInputBuffer.java:276)
+	at org.apache.http.impl.conn.DefaultHttpResponseParser.parseHead(DefaultHttpResponseParser.java:138)
+	at org.apache.http.impl.conn.DefaultHttpResponseParser.parseHead(DefaultHttpResponseParser.java:56)
+	at org.apache.http.impl.io.AbstractMessageParser.parse(AbstractMessageParser.java:259)
+	at org.apache.http.impl.DefaultBHttpClientConnection.receiveResponseHeader(DefaultBHttpClientConnection.java:163)
+	at com.devmate.service.payment.GarantiPosClient.sendPayment(GarantiPosClient.java:94)
+	at com.devmate.service.PaymentService.process(PaymentService.java:58)
+	at com.devmate.service.OrderProcessingService.executeOrder(OrderProcessingService.java:112)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2026-08-18 14:45:27.045 [WARN]  [PaymentGatewayApp] [Thread-14] [c.d.s.InventoryService] - Rollback triggered for stock reservation RSV-33020 due to payment failure.
+2026-08-18 14:45:27.060 [INFO]  [PaymentGatewayApp] [Thread-14] [c.d.s.InventoryService] - Stock reservation RSV-33020 successfully released.
+2026-08-18 14:45:30.110 [INFO]  [NotificationService] [Thread-5] [c.d.n.KafkaConsumer] - Consumed message from topic 'order-events'. Partition: 2, Offset: 881290
+2026-08-18 14:45:30.115 [DEBUG] [NotificationService] [Thread-5] [c.d.n.EmailSender] - Rendering email template 'order_failure.html' for recipient 'customer5192@example.com'
+2026-08-18 14:45:30.410 [INFO]  [NotificationService] [Thread-5] [c.d.n.EmailSender] - Failure notification email successfully queued via SMTP gateway.
+2026-08-18 14:45:35.800 [ERROR] [DatabasePool] [HikariCP-Worker-3] [c.d.d.UserSessionRepository] - Failed to execute query on replica cluster node-02.
+org.postgresql.util.PSQLException: Connection to 10.0.4.15:5432 refused. Check that the hostname and port are correct and that the postmaster is accepting TCP/IP connections.
+	at org.postgresql.core.v3.ConnectionFactoryImpl.openConnectionImpl(ConnectionFactoryImpl.java:319)
+	at org.postgresql.core.ConnectionFactory.openConnection(ConnectionFactory.java:49)
+	at org.postgresql.jdbc.PgConnection.<init>(PgConnection.java:247)
+	at org.postgresql.Driver.makeConnection(Driver.java:434)
+	at org.postgresql.Driver.connect(Driver.java:291)
+	at com.zaxxer.hikari.util.DriverDataSource.getConnection(DriverDataSource.java:138)
+	at com.zaxxer.hikari.pool.PoolBase.newConnection(PoolBase.java:364)
+	at com.zaxxer.hikari.pool.PoolBase.newPoolEntry(PoolBase.java:206)
+	at com.zaxxer.hikari.pool.HikariPool.createPoolEntry(HikariPool.java:476)
+	at com.zaxxer.hikari.pool.HikariPool.checkFailFast(HikariPool.java:561)
+	at com.zaxxer.hikari.pool.HikariPool.<init>(HikariPool.java:115)
+	at com.zaxxer.hikari.HikariDataSource.getConnection(HikariDataSource.java:112)
+	at com.devmate.repository.UserSessionRepository.cleanupExpiredTokens(UserSessionRepository.java:45)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:572)
+	at java.base/java.util.concurrent.FutureTask.runAndReset(FutureTask.java:358)
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:305)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+Caused by: java.net.ConnectException: Connection refused
+	at java.base/sun.nio.ch.Net.pollConnect(Native Method)
+	at java.base/sun.nio.ch.Net.pollConnectNow(Net.java:682)
+	at java.base/sun.nio.ch.NioSocketImpl.timedFinishConnect(NioSocketImpl.java:549)
+	at java.base/sun.nio.ch.NioSocketImpl.connect(NioSocketImpl.java:597)
+	at java.base/java.net.SocksSocketImpl.connect(SocksSocketImpl.java:327)
+	at java.base/java.net.Socket.connect(Socket.java:751)
+	at org.postgresql.core.PGStream.createSocket(PGStream.java:241)
+	at org.postgresql.core.PGStream.<init>(PGStream.java:98)
+	at org.postgresql.core.v3.ConnectionFactoryImpl.tryConnect(ConnectionFactoryImpl.java:109)
+	at org.postgresql.core.v3.ConnectionFactoryImpl.openConnectionImpl(ConnectionFactoryImpl.java:235)
+	... 18 common frames omitted
+2026-08-18 14:45:35.815 [WARN]  [DatabasePool] [HikariCP-Worker-3] [c.d.d.UserSessionRepository] - Failover triggered: Routing session queries to primary master DB node.
+2026-08-18 14:45:40.100 [ERROR] [UserProfileModule] [Thread-21] [c.d.u.UserProfileController] - NullPointerException encountered while parsing user metadata attributes.
+java.lang.NullPointerException: Cannot invoke "com.devmate.model.Address.getPostalCode()" because the return value of "com.devmate.model.UserProfile.getAddress()" is null
+	at com.devmate.util.ShippingCalculator.calculateZone(ShippingCalculator.java:32)
+	at com.devmate.service.UserProfileService.enrichShippingDetails(UserProfileService.java:87)
+	at com.devmate.controller.UserProfileController.getUserProfile(UserProfileController.java:54)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:205)
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:150)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:884)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:797)
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1081)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:974)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1011)
+	at org.springframework.web.servlet.FrameworkServlet.doGet(FrameworkServlet.java:903)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:564)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:205)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149)
+	at org.springframework.boot.actuate.metrics.web.servlet.WebMvcMetricsFilter.doFilterInternal(WebMvcMetricsFilter.java:96)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:482)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:389)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:904)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1741)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1191)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2026-08-18 14:45:45.002 [INFO]  [SystemMonitor] [Thread-2] [c.d.m.HealthCheckScheduler] - Memory usage: 612MB / 2048MB (29.8%), CPU Load: 14.2%, Thread Count: 48
+2026-08-18 14:45:50.112 [INFO]  [ApiGateway] [Reactor-Netty-1] [c.d.g.r.RouteLocator] - Route matched: /api/v1/auth/refresh -> http://auth-service:8081/refresh
+2026-08-18 14:45:50.125 [INFO]  [AuthService] [Thread-10] [c.d.a.JwtTokenProvider] - Token refresh successful for subject: abdulkahhar.turkoglu (Expires in 3600s)

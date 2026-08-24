@@ -8,7 +8,7 @@ import {
   User
 } from 'lucide-react'
 
-export function Dashboard({ onSelectCompare, onSelectLogAnalyzer }: { onSelectCompare: () => void, onSelectLogAnalyzer: () => void }) {
+export function Dashboard({ onSelectCompare, onSelectLogAnalyzer, onSelectJwtDecoder }: { onSelectCompare: () => void, onSelectLogAnalyzer: () => void, onSelectJwtDecoder: () => void }) {
   return (
     <div className="flex-1 flex flex-col">
       <header className="h-16 border-b border-border bg-card flex items-center justify-between px-6">
@@ -63,21 +63,24 @@ export function Dashboard({ onSelectCompare, onSelectLogAnalyzer }: { onSelectCo
             </div>
           </button>
 
-          {/* Disabled Card: JWT Decoder */}
-          <div className="relative flex flex-col bg-[#1a252b] border border-[#007acc]/20 rounded-2xl p-10 min-h-[300px] opacity-60 cursor-not-allowed">
-            <div className="absolute top-6 right-6 bg-background/80 backdrop-blur-sm border border-border px-3 py-1.5 rounded-md text-xs font-bold text-muted-foreground tracking-wider uppercase">
-              404 / Soon
+          {/* Active Card: JWT Decoder */}
+          <button
+            onClick={onSelectJwtDecoder}
+            className="group relative flex flex-col text-left bg-[#1a252b] border border-[#007acc]/30 rounded-2xl p-10 min-h-[300px] hover:border-[#007acc] transition-all hover:shadow-[0_0_20px_rgba(0,122,204,0.1)] overflow-hidden"
+          >
+            <div className="absolute top-0 right-0 w-32 h-32 bg-[#007acc]/10 rounded-full blur-3xl -mr-10 -mt-10 transition-transform group-hover:scale-110" />
+            <div className="absolute top-6 right-6 bg-background/80 backdrop-blur-sm border border-[#007acc]/40 px-3 py-1.5 rounded-md text-xs font-bold text-[#007acc] tracking-wider uppercase">
+              NEW
             </div>
-            <div className="w-14 h-14 rounded-xl bg-[#1f333d] border border-[#007acc]/30 flex items-center justify-center mb-8">
+            <div className="w-14 h-14 rounded-xl bg-[#1f333d] border border-[#007acc]/40 flex items-center justify-center mb-8 z-10">
               <KeyRound className="w-6 h-6 text-[#007acc]" />
             </div>
-            <h3 className="text-lg font-medium text-[#007acc] mb-2 flex items-center gap-2">
-              JWT Decoder
-            </h3>
-            <p className="text-[#7e9ba8] text-sm font-mono text-xs break-all leading-relaxed mb-1 text-ellipsis overflow-hidden line-clamp-3">
-              eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI...
-            </p>
-          </div>
+            <h3 className="text-lg font-medium text-[#007acc] mb-2 z-10 group-hover:text-[#3399ff] transition-colors">JWT Decoder</h3>
+            <p className="text-[#7e9ba8] text-sm z-10">Inspect JSON Web Tokens entirely offline. Base64 decoding and claims verification.</p>
+            <div className="mt-6 flex items-center text-[#007acc] text-sm font-medium z-10 opacity-0 group-hover:opacity-100 transition-opacity -translate-x-2 group-hover:translate-x-0">
+              Launch Workspace <ChevronRight className="w-4 h-4 ml-1" />
+            </div>
+          </button>
         </div>
       </main>
     </div>
