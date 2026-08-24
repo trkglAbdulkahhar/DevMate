@@ -31,7 +31,7 @@ builder.Services.AddRateLimiter(options =>{
     options.OnRejected = async (context, token) =>{
         context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
         await context.HttpContext.Response.WriteAsJsonAsync(new {
-            detail = "Cok fazla istek attiniz. Lutfen 30 saniye sonra tekrar deneyiniz."
+            detail = "Cok fazla istek attiniz. Gunluk 30 istek limitinizi doldurdunuz, lutfen yarin tekrar deneyiniz."
         }, token);
     };
 

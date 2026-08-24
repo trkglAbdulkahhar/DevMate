@@ -141,7 +141,7 @@ export function LogAnalyzerScreen({ onBack }: { onBack: () => void }) {
     }
 
     if (entries.filter(e => selectedAiLevels.has(e.level)).length > 50) {
-      alert("Token sinirlarini asmamak icin en gucnel 50 log yapay zekaya gonderiliyor.")
+      alert("Token sınırlarını aşmamak için ilk 50 log yapay zekaya gönderiliyor.")
     }
 
     setIsAiAnalyzing(true);
