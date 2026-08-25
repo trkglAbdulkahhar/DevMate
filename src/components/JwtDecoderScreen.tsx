@@ -1,289 +1,18 @@
-import React, { useState, useCallback } from "react";
+import { useState, useCallback } from "react";
 
-// ── helpers ──────────────────────────────────────────────────────────────────
+import { decodeJwt } from '../utils/jwtDecoder';
+import type { JwtDecodedData } from '../utils/jwtDecoder';
 
-function base64UrlDecode(str: string): string {
-  const padded = str.replace(/-/g, "+").replace(/_/g, "/");
-  const padLen = (4 - (padded.length % 4)) % 4;
-  const b64 = padded + "=".repeat(padLen);
-  try {
-    return decodeURIComponent(
-      atob(b64)
-        .split("")
-        .map((c) => "%" + c.charCodeAt(0).toString(16).padStart(2, "0"))
-        .join("")
-    );
-  } catch {
-    return atob(b64);
-  }
-}
-
-function tryParseJson(s: string): Record<string, unknown> | null {
-  try {
-    return JSON.parse(s);
-  } catch {
-    return null;
-  }
-}
-
-interface Parsed {
-  header: Record<string, unknown> | null;
-  payload: Record<string, unknown> | null;
-  signature: string;
-  valid: boolean;
-}
-
-function parseJwt(token: string): Parsed {
-  const parts = token.trim().split(".");
-  if (parts.length !== 3) {
-    throw new Error("Token uygun formatta değil: 3 parçadan (Header, Payload, Signature) oluşmalıdır.");
-  }
-  const [h, p, sig] = parts;
-  return {
-    header: tryParseJson(base64UrlDecode(h)),
-    payload: tryParseJson(base64UrlDecode(p)),
-    signature: sig,
-    valid: true,
-  };
-}
-
-// ── syntax highlighting ───────────────────────────────────────────────────────
-
-const JSON_COLORS = {
-  key: "#e879f9",
-  string: "#86efac",
-  number: "#f9a8d4",
-  boolean: "#67e8f9",
-  null: "#94a3b8",
-  punctuation: "rgba(255,255,255,0.35)",
-};
-
-function colorizeJson(obj: Record<string, unknown>): React.ReactNode[] {
-  const lines: React.ReactNode[] = [];
-  const entries = Object.entries(obj);
-
-  lines.push(
-    <span key="open" style={{ color: JSON_COLORS.punctuation }}>{"{"}{"\n"}</span>
-  );
-
-  entries.forEach(([key, val], i) => {
-    const isLast = i === entries.length - 1;
-    const comma = isLast ? "" : ",";
-    let valueEl: React.ReactNode;
-
-    if (val === null) {
-      valueEl = <span style={{ color: JSON_COLORS.null }}>null</span>;
-    } else if (typeof val === "boolean") {
-      valueEl = <span style={{ color: JSON_COLORS.boolean }}>{String(val)}</span>;
-    } else if (typeof val === "number") {
-      valueEl = <span style={{ color: JSON_COLORS.number }}>{val}</span>;
-    } else if (typeof val === "string") {
-      valueEl = <span style={{ color: JSON_COLORS.string }}>"{val}"</span>;
-    } else {
-      valueEl = <span style={{ color: JSON_COLORS.string }}>"{JSON.stringify(val)}"</span>;
-    }
-
-    lines.push(
-      <span key={key}>
-        {"  "}
-        <span style={{ color: JSON_COLORS.key }}>"{key}"</span>
-        <span style={{ color: JSON_COLORS.punctuation }}>: </span>
-        {valueEl}
-        <span style={{ color: JSON_COLORS.punctuation }}>{comma}</span>
-        {"\n"}
-      </span>
-    );
-  });
-
-  lines.push(
-    <span key="close" style={{ color: JSON_COLORS.punctuation }}>{"}"}</span>
-  );
-
-  return lines;
-}
-
-// ── token colorizer ───────────────────────────────────────────────────────────
-
-function TokenDisplay({ token }: { token: string }) {
-  if (!token.trim()) {
-    return (
-      <div className="token-input p-4 h-full flex items-center justify-center" style={{ minHeight: 160 }}>
-        <span style={{ color: "rgba(255,255,255,0.2)", fontFamily: "JetBrains Mono", fontSize: 13 }}>
-          Paste your JWT here...
-        </span>
-      </div>
-    );
-  }
-
-  const parts = token.trim().split(".");
-  if (parts.length !== 3) {
-    return (
-      <div className="token-input p-4" style={{ minHeight: 160, wordBreak: "break-all" }}>
-        <span style={{ color: "#ff2d78" }}>{token}</span>
-      </div>
-    );
-  }
-
-  const [h, p, s] = parts;
-
-  return (
-    <div
-      className="token-input p-4"
-      style={{ minHeight: 160, wordBreak: "break-all", whiteSpace: "pre-wrap" }}
-    >
-      <span style={{ color: "#ff2d78", textShadow: "0 0 8px rgba(255,45,120,0.5)" }}>{h}</span>
-      <span style={{ color: "rgba(255,255,255,0.2)" }}>.</span>
-      <span style={{ color: "#a855f7", textShadow: "0 0 8px rgba(168,85,247,0.5)" }}>{p}</span>
-      <span style={{ color: "rgba(255,255,255,0.2)" }}>.</span>
-      <span style={{ color: "#00e5ff", textShadow: "0 0 8px rgba(0,229,255,0.5)" }}>{s}</span>
-    </div>
-  );
-}
-
-// ── claims summary ────────────────────────────────────────────────────────────
-
-const KNOWN_CLAIMS: Record<string, string> = {
-  alg: "Algorithm",
-  typ: "Type",
-  iss: "Issuer",
-  sub: "Subject",
-  aud: "Audience",
-  exp: "Expires At",
-  nbf: "Not Before",
-  iat: "Issued At",
-  jti: "JWT ID",
-};
-
-function formatTimestamp(ts: unknown): string {
-  if (typeof ts !== "number") return String(ts);
-  try {
-    return new Date(ts * 1000).toLocaleString("en-US", {
-      year: "numeric", month: "short", day: "numeric",
-      hour: "2-digit", minute: "2-digit", second: "2-digit",
-      hour12: false,
-    });
-  } catch {
-    return String(ts);
-  }
-}
-
-function isExpired(ts: unknown): boolean {
-  if (typeof ts !== "number") return false;
-  return Date.now() > ts * 1000;
-}
-
-function ClaimRow({
-  claimKey,
-  value,
-}: {
-  claimKey: string;
-  value: unknown;
-}) {
-  const label = KNOWN_CLAIMS[claimKey] || claimKey;
-  const isTime = ["exp", "iat", "nbf"].includes(claimKey);
-  const displayVal = isTime ? formatTimestamp(value) : String(value);
-  const expired = claimKey === "exp" ? isExpired(value) : null;
-
-  return (
-    <div
-      className="flex items-start gap-3 py-2.5"
-      style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
-    >
-      <div style={{ minWidth: 120, flex: "0 0 120px" }}>
-        <span
-          style={{
-            fontFamily: "JetBrains Mono",
-            fontSize: 11,
-            color: "#a855f7",
-            textShadow: "0 0 6px rgba(168,85,247,0.4)",
-          }}
-        >
-          {claimKey}
-        </span>
-        <div style={{ fontSize: 10, color: "rgba(255,255,255,0.35)", marginTop: 1 }}>
-          {label}
-        </div>
-      </div>
-      <div className="flex-1 flex items-center gap-2 flex-wrap">
-        <span
-          style={{
-            fontFamily: "JetBrains Mono",
-            fontSize: 12,
-            color: "rgba(255,255,255,0.75)",
-            wordBreak: "break-all",
-          }}
-        >
-          {displayVal}
-        </span>
-        {expired !== null && (
-          <span
-            className={`px-1.5 py-0.5 rounded text-xs font-semibold tracking-wide ${
-              expired ? "badge-expired" : "badge-valid"
-            }`}
-            style={{ fontFamily: "JetBrains Mono", fontSize: 10 }}
-          >
-            {expired ? "EXPIRED" : "VALID"}
-          </span>
-        )}
-      </div>
-    </div>
-  );
-}
-
-// ── json viewer block ─────────────────────────────────────────────────────────
-
-function JsonViewer({
-  label,
-  data,
-  colorClass,
-  accentColor,
-}: {
-  label: string;
-  data: Record<string, unknown> | null;
-  colorClass: string;
-  accentColor: string;
-}) {
-  return (
-    <div className={colorClass}>
-      <div className="px-4 pt-4 pb-3">
-        <div className="flex items-center gap-2 mb-3">
-          <div
-            style={{
-              width: 8,
-              height: 8,
-              borderRadius: "50%",
-              background: accentColor,
-              boxShadow: `0 0 6px ${accentColor}`,
-            }}
-          />
-          <span
-            style={{
-              fontFamily: "JetBrains Mono",
-              fontSize: 11,
-              fontWeight: 600,
-              color: accentColor,
-              textTransform: "uppercase",
-              letterSpacing: "0.12em",
-              textShadow: `0 0 8px ${accentColor}80`,
-            }}
-          >
-            {label}
-          </span>
-        </div>
-        <div className="json-viewer">
-          {data ? colorizeJson(data) : (
-            <span style={{ color: "rgba(255,255,255,0.2)" }}>—</span>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
+import { TokenDisplay } from './jwt/TokenDisplay';
+import { JsonViewer } from './jwt/JsonViewer';
+import { ClaimRow, KNOWN_CLAIMS } from './jwt/ClaimRow';
 
 // ── main app ──────────────────────────────────────────────────────────────────
 
+
+
 const SAMPLE_JWT =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyXzEyMzQ1NiIsImlzcyI6ImF1dGgubXlhcHAuaW8iLCJpYXQiOjE3MTQwMDAwMDAsImV4cCI6MTcxNDAwMzYwMCwibmFtZSI6IkFsZXggQ2hlbiIsInJvbGUiOiJhZG1pbiIsInRpZXIiOiJwcm8ifQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c";
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyXzEyMzQ1NiIsImlzcyI6ImF1dGgubXlhcHAuaW8iLCJpYXQiOjE3MTQwMDAwMDAsIm5iZiI6MTgwMDAwMDAwMCwiZXhwIjoxNzE0MDAzNjAwLCJuYW1lIjoiQWxleCBDaGVuIiwicm9sZSI6ImFkbWluIiwidGllciI6InBybyJ9.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c";
 
 export function JwtDecoderScreen({ onBack }: { onBack: () => void }) {
   const [token, setToken] = useState("");
@@ -292,7 +21,8 @@ export function JwtDecoderScreen({ onBack }: { onBack: () => void }) {
 
   const handleLoadSample = useCallback(() => {
     setToken(SAMPLE_JWT);
-    setTokenToDecode(SAMPLE_JWT);
+    // Remove auto-decode: user must click "DECODE TOKEN" manually.
+    setTokenToDecode("");
   }, []);
 
   const handleClear = useCallback(() => {
@@ -300,12 +30,12 @@ export function JwtDecoderScreen({ onBack }: { onBack: () => void }) {
     setTokenToDecode("");
   }, []);
 
-  let parsed: Parsed | null = null;
+  let parsed: JwtDecodedData | null = null;
   let decodeError: string | null = null;
 
   if (tokenToDecode.trim()) {
     try {
-      parsed = parseJwt(tokenToDecode);
+      parsed = decodeJwt(tokenToDecode);
     } catch (err: any) {
       decodeError = err.message || "Geçersiz format.";
     }

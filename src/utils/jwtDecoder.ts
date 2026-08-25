@@ -35,9 +35,17 @@ export function decodeJwt(token: string): JwtDecodedData {
     throw new Error("Token uygun formatta değil: 3 parçadan (Header, Payload, Signature) oluşmalıdır.");
   }
   const [h, p, sig] = parts;
+  
+  const header = tryParseJson(base64UrlDecode(h));
+  const payload = tryParseJson(base64UrlDecode(p));
+
+  if (!header || !payload) {
+    throw new Error("Token içeriği geçersiz (Header veya Payload geçerli bir JSON değil).");
+  }
+
   return {
-    header: tryParseJson(base64UrlDecode(h)),
-    payload: tryParseJson(base64UrlDecode(p)),
+    header,
+    payload,
     signature: sig,
     valid: true,
   };

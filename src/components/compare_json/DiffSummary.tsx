@@ -1,6 +1,5 @@
-
 import { ShieldAlert } from 'lucide-react'
-import { type DiffType } from '../utils/jsonDiff'
+import { type DiffType } from '../../utils/jsonDiff'
 
 interface DiffSummaryProps {
   error: string | null

@@ -11,9 +11,9 @@ import {
   XCircle,
   FileJson
 } from 'lucide-react'
-import { DiffViewer } from './DiffViewer'
-import { JsonEditor } from './JsonEditor'
-import { DiffSummary } from './DiffSummary'
+import { DiffViewer } from './compare_json/DiffViewer'
+import { JsonEditor } from './compare_json/JsonEditor'
+import { DiffSummary } from './compare_json/DiffSummary'
 
 export function JsonCompareScreen({ onBack }: { onBack: () => void }) {
   const [origText, setOrigText] = useState('')

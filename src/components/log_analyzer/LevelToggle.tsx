@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { type LogLevel } from '../utils/logParser'
+import { type LogLevel } from '../../utils/logParser'
 import { LEVEL_CONFIG } from './logLevelConfig'
 
 export function LevelToggle({ level, active, count, onToggle }: { level: LogLevel, active: boolean, count: number, onToggle: () => void }) {

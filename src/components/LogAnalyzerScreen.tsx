@@ -1,8 +1,8 @@
 import { useState, useMemo } from 'react'
 import { ArrowLeft } from 'lucide-react'
 import { type LogLevel, type LogEntry, parseLogs } from '../utils/logParser'
-import { LogCard } from './LogCard'
-import { LevelToggle } from './LevelToggle'
+import { LogCard } from './log_analyzer/LogCard'
+import { LevelToggle } from './log_analyzer/LevelToggle'
 
 const SAMPLE_LOG = `2024-01-15 09:23:41.112 ERROR [com.app.services.PaymentService] - Payment processing failed
 java.lang.NullPointerException: Cannot invoke method charge() on null object reference

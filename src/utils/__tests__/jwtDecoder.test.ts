@@ -44,6 +44,12 @@ describe('jwtDecoder utility', () => {
       expect(() => decodeJwt('part1')).toThrow("Token uygun formatta değil"); // 1 part
       expect(() => decodeJwt('part1.part2.part3.part4')).toThrow("Token uygun formatta değil"); // 4 parts
     });
+
+    it('should throw error if header or payload is not valid JSON', () => {
+      // Invalid base64 that doesn't parse to JSON
+      const invalidToken = 'invalidheader.invalidpayload.signature';
+      expect(() => decodeJwt(invalidToken)).toThrow("Token içeriği geçersiz");
+    });
   });
 
   describe('Time validation (exp / nbf)', () => {

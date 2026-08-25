@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { type LogEntry } from '../utils/logParser'
+import { type LogEntry } from '../../utils/logParser'
 import { LEVEL_CONFIG } from './logLevelConfig'
 import { Badge } from './Badge'
 

@@ -76,7 +76,7 @@ export function Dashboard({ onSelectCompare, onSelectLogAnalyzer, onSelectJwtDec
               <KeyRound className="w-6 h-6 text-[#007acc]" />
             </div>
             <h3 className="text-lg font-medium text-[#007acc] mb-2 z-10 group-hover:text-[#3399ff] transition-colors">JWT Decoder</h3>
-            <p className="text-[#7e9ba8] text-sm z-10">Inspect JSON Web Tokens entirely offline. Base64 decoding and claims verification.</p>
+            <p className="text-[#7e9ba8] text-sm z-10">Inspect JSON Web Tokens entirely offline. Base64 decoding and claims inspection/decoding.</p>
             <div className="mt-6 flex items-center text-[#007acc] text-sm font-medium z-10 opacity-0 group-hover:opacity-100 transition-opacity -translate-x-2 group-hover:translate-x-0">
               Launch Workspace <ChevronRight className="w-4 h-4 ml-1" />
             </div>

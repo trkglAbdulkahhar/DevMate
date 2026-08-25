@@ -1,4 +1,4 @@
-import { type LogLevel } from '../utils/logParser'
+import { type LogLevel } from '../../utils/logParser'
 
 export const LEVEL_CONFIG: Record<LogLevel, { color: string; bg: string; border: string; ring: string; dot: string }> = {
   ERROR: {

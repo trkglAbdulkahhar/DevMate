@@ -1,5 +1,4 @@
-
-import { type DiffNode } from '../utils/jsonDiff'
+import { type DiffNode } from '../../utils/jsonDiff'
 
 export function DiffViewer({ node, side, indent = 0, name = '', path = 'root', activeDiffId = null }: { node: DiffNode, side: 'orig' | 'mod', indent?: number, name?: string, path?: string, activeDiffId?: string | null }) {
   const pad = '  '.repeat(indent)

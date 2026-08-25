@@ -1,4 +1,4 @@
-import { type LogLevel } from '../utils/logParser'
+import { type LogLevel } from '../../utils/logParser'
 import { LEVEL_CONFIG } from './logLevelConfig'
 
 export function Badge({ level }: { level: LogLevel }) {
