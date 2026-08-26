@@ -370,19 +370,6 @@ export function JwtDecoderScreen({ onBack }: { onBack: () => void }) {
 
               {aiInsights && (
                 <div style={{ padding: "16px" }}>
-                  <div style={{
-                    display: "inline-block",
-                    padding: "4px 8px",
-                    borderRadius: "4px",
-                    background: aiInsights.riskLevel === "Critical" ? "rgba(239,68,68,0.2)" : aiInsights.riskLevel === "High" ? "rgba(249,115,22,0.2)" : aiInsights.riskLevel === "Medium" ? "rgba(234,179,8,0.2)" : "rgba(34,197,94,0.2)",
-                    color: aiInsights.riskLevel === "Critical" ? "#ef4444" : aiInsights.riskLevel === "High" ? "#f97316" : aiInsights.riskLevel === "Medium" ? "#eab308" : "#22c55e",
-                    fontFamily: "JetBrains Mono",
-                    fontSize: 11,
-                    fontWeight: 700,
-                    marginBottom: 12
-                  }}>
-                    OVERALL RISK: {aiInsights.riskLevel?.toUpperCase()}
-                  </div>
                   <p style={{ fontSize: 13, color: "rgba(255,255,255,0.85)", lineHeight: 1.5, marginBottom: 16 }}>
                     {aiInsights.summary}
                   </p>
