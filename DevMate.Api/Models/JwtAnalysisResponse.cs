@@ -1,7 +1,6 @@
 namespace DevMate.Api.Models;
 
 public class JwtAnalysisResponse {
-    public string RiskLevel { get; set; } = string.Empty;
     public string Summary { get; set; } = string.Empty;
     public List<JwtFinding> Findings { get; set; } = new();
 }

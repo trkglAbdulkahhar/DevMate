@@ -253,10 +253,8 @@ Amacın, sana verilen JWT (JSON Web Token) Header ve Payload verilerini, fronten
 1. Biz bu sistemde sadece Payload ve Header'ı görüyoruz, KRİPTOGRAFİK İMZA DOĞRULAMASI (Signature Verification) YAPMIYORUZ.
 2. Bu yüzden, ASLA VE ASLA token için 'Geçerlidir', 'Güvenlidir', 'Kullanılabilir' gibi kesin hükümler KURMA. Senin amacın bir 'Güvenlik Doğrulaması' yapmak değil, 'Güvenlik Risk Analizi ve Mimari Öneri' sunmaktır.
 3. SystemChecks içindeki bulguları ezbere tekrarlama; o bulguların backend mimarisinde ne gibi felaketlere (SSRF, Replay Attack vb.) yol açabileceğini detaylandır.
-4. 'RiskLevel' olarak sadece Low, Medium, High veya Critical değerlerinden birini dön.
-BİREBİR aşağıdaki JSON formatında, Markdown karakterleri (```json) kullanmadan, sadece ham JSON objesi olarak Türkçe cevap dön:
+4. BİREBİR aşağıdaki JSON formatında, Markdown karakterleri (```json) kullanmadan, sadece ham JSON objesi olarak Türkçe cevap dön:
 {
-  ""riskLevel"": ""High"",
   ""summary"": ""Token genel mimari açısından değerlendirildiğinde..."",
   ""findings"": [
     {
