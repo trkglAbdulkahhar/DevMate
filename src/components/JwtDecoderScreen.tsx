@@ -1,11 +1,13 @@
 import { useState, useCallback } from "react";
 
-import { decodeJwt } from '../utils/jwtDecoder';
-import type { JwtDecodedData } from '../utils/jwtDecoder';
+import { decodeJwt, getDeterministicChecks, MaskPii } from '../utils/jwtDecoder';
+import type { JwtDecodedData, DeterministicFinding } from '../utils/jwtDecoder';
 
 import { TokenDisplay } from './jwt/TokenDisplay';
 import { JsonViewer } from './jwt/JsonViewer';
 import { ClaimRow, KNOWN_CLAIMS } from './jwt/ClaimRow';
+
+
 
 // ── main app ──────────────────────────────────────────────────────────────────
 
@@ -18,6 +20,9 @@ export function JwtDecoderScreen({ onBack }: { onBack: () => void }) {
   const [token, setToken] = useState("");
   const [tokenToDecode, setTokenToDecode] = useState("");
   const [inputFocused, setInputFocused] = useState(false);
+  const [aiInsights, setAiInsights] = useState<any>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [deterministicChecks, setDeterministicChecks] = useState<DeterministicFinding[]>([]);
 
   const handleLoadSample = useCallback(() => {
     setToken(SAMPLE_JWT);
@@ -28,6 +33,8 @@ export function JwtDecoderScreen({ onBack }: { onBack: () => void }) {
   const handleClear = useCallback(() => {
     setToken("");
     setTokenToDecode("");
+    setAiInsights(null);
+    setDeterministicChecks([]);
   }, []);
 
   let parsed: JwtDecodedData | null = null;
@@ -36,10 +43,40 @@ export function JwtDecoderScreen({ onBack }: { onBack: () => void }) {
   if (tokenToDecode.trim()) {
     try {
       parsed = decodeJwt(tokenToDecode);
+
+      if (parsed.header && parsed.payload && deterministicChecks.length === 0) {
+        setDeterministicChecks(getDeterministicChecks(parsed.header, parsed.payload));
+      }
     } catch (err: any) {
       decodeError = err.message || "Geçersiz format.";
     }
   }
+
+  const handleAiAnalysis = async () => {
+    if (!parsed?.header || !parsed?.payload) return;
+    setIsAnalyzing(true);
+    try {
+      const maskedPayload = MaskPii(parsed.payload);
+      const response = await fetch("http://localhost:5242/api/jwt/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          Header: parsed.header,
+          Payload: maskedPayload,
+          DeterministicFindings: deterministicChecks
+        })
+      });
+
+      if (!response.ok) throw new Error("Api Hatasi");
+      const data = await response.json();
+      setAiInsights(data);
+    } catch (error) {
+      console.error("Ai analizi basarisiz:", error);
+
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
 
   const allClaims = parsed
     ? { ...(parsed.header || {}), ...(parsed.payload || {}) }
@@ -65,7 +102,7 @@ export function JwtDecoderScreen({ onBack }: { onBack: () => void }) {
             title="Back to Dashboard"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M19 12H5M12 19l-7-7 7-7"/>
+              <path d="M19 12H5M12 19l-7-7 7-7" />
             </svg>
           </button>
           <div className="flex items-center gap-3">
@@ -243,11 +280,15 @@ export function JwtDecoderScreen({ onBack }: { onBack: () => void }) {
             />
           </div>
 
-          <button 
-            onClick={() => setTokenToDecode(token)}
+          <button
+            onClick={() => {
+              setTokenToDecode(token);
+              setAiInsights(null);
+              setDeterministicChecks([]);
+            }}
             className="decode-btn"
           >
-             DECODE TOKEN
+            DECODE TOKEN
           </button>
 
           {/* Status bar */}
@@ -285,11 +326,97 @@ export function JwtDecoderScreen({ onBack }: { onBack: () => void }) {
               <TokenDisplay token={tokenToDecode} />
             </div>
           )}
+
+          {/* AI Security Insights */}
+          {parsed?.valid && (
+            <div className="glass-panel" style={{ padding: 0, overflow: "hidden", border: "1px solid rgba(168, 85, 247, 0.3)" }}>
+              <div
+                style={{
+                  padding: "12px 16px",
+                  borderBottom: "1px solid rgba(255,255,255,0.06)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  background: "rgba(168, 85, 247, 0.05)"
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ fontSize: 12 }}>🤖</span>
+                  <span style={{ fontFamily: "JetBrains Mono", fontSize: 11, fontWeight: 600, color: "#a855f7", letterSpacing: "0.1em" }}>
+                    AI SECURITY INSIGHTS
+                  </span>
+                </div>
+                {!aiInsights && (
+                  <button
+                    onClick={handleAiAnalysis}
+                    disabled={isAnalyzing}
+                    style={{
+                      background: "linear-gradient(135deg, #a855f7, #6366f1)",
+                      color: "white",
+                      border: "none",
+                      padding: "6px 12px",
+                      borderRadius: "4px",
+                      fontSize: 11,
+                      fontWeight: 600,
+                      fontFamily: "JetBrains Mono",
+                      cursor: isAnalyzing ? "not-allowed" : "pointer",
+                      opacity: isAnalyzing ? 0.7 : 1
+                    }}
+                  >
+                    {isAnalyzing ? "ANALYZING..." : "RUN SECURITY ANALYSIS"}
+                  </button>
+                )}
+              </div>
+
+              {aiInsights && (
+                <div style={{ padding: "16px" }}>
+                  <div style={{
+                    display: "inline-block",
+                    padding: "4px 8px",
+                    borderRadius: "4px",
+                    background: aiInsights.riskLevel === "Critical" ? "rgba(239,68,68,0.2)" : aiInsights.riskLevel === "High" ? "rgba(249,115,22,0.2)" : aiInsights.riskLevel === "Medium" ? "rgba(234,179,8,0.2)" : "rgba(34,197,94,0.2)",
+                    color: aiInsights.riskLevel === "Critical" ? "#ef4444" : aiInsights.riskLevel === "High" ? "#f97316" : aiInsights.riskLevel === "Medium" ? "#eab308" : "#22c55e",
+                    fontFamily: "JetBrains Mono",
+                    fontSize: 11,
+                    fontWeight: 700,
+                    marginBottom: 12
+                  }}>
+                    OVERALL RISK: {aiInsights.riskLevel?.toUpperCase()}
+                  </div>
+                  <p style={{ fontSize: 13, color: "rgba(255,255,255,0.85)", lineHeight: 1.5, marginBottom: 16 }}>
+                    {aiInsights.summary}
+                  </p>
+
+                  {aiInsights.findings?.length > 0 && (
+                    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                      {aiInsights.findings.map((f: any, idx: number) => (
+                        <div key={idx} style={{ padding: "12px", background: "rgba(0,0,0,0.3)", borderRadius: "6px", border: "1px solid rgba(255,255,255,0.05)" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                            <span style={{
+                              fontSize: 10,
+                              fontWeight: 700,
+                              padding: "2px 6px",
+                              borderRadius: "4px",
+                              background: f.severity === "Critical" ? "rgba(239,68,68,0.2)" : f.severity === "High" ? "rgba(249,115,22,0.2)" : f.severity === "Medium" ? "rgba(234,179,8,0.2)" : "rgba(59,130,246,0.2)",
+                              color: f.severity === "Critical" ? "#ef4444" : f.severity === "High" ? "#f97316" : f.severity === "Medium" ? "#eab308" : "#3b82f6"
+                            }}>{f.severity?.toUpperCase()}</span>
+                            <span style={{ fontFamily: "JetBrains Mono", fontSize: 11, color: "#a855f7" }}>{f.claim}</span>
+                          </div>
+                          <p style={{ margin: "0 0 6px 0", fontSize: 12, color: "rgba(255,255,255,0.9)" }}>{f.issue}</p>
+                          <p style={{ margin: 0, fontSize: 12, color: "rgba(255,255,255,0.6)" }}><strong>Öneri:</strong> {f.recommendation}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* ── RIGHT: Decoded panels ── */}
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          
+
           {/* Error Banner */}
           {decodeError && (
             <div className="error-banner p-3 mb-1 flex items-start gap-3">
@@ -380,6 +507,54 @@ export function JwtDecoderScreen({ onBack }: { onBack: () => void }) {
               </div>
             </div>
           )}
+
+          {/* Deterministic Security Checks */}
+          {parsed?.valid && deterministicChecks.length > 0 && (
+            <div className="glass-panel" style={{ padding: 0, overflow: "hidden" }}>
+              <div
+                style={{
+                  padding: "12px 16px",
+                  borderBottom: "1px solid rgba(255,255,255,0.06)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between"
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ fontSize: 12 }}>🛡️</span>
+                  <span style={{ fontFamily: "JetBrains Mono", fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.6)", letterSpacing: "0.1em" }}>
+                    DETERMINISTIC SECURITY STATUS
+                  </span>
+                </div>
+              </div>
+              <div style={{ padding: "12px 16px", display: "flex", flexDirection: "column", gap: 8 }}>
+                {deterministicChecks.map((check, idx) => (
+                  <div key={idx} style={{
+                    padding: "10px",
+                    borderRadius: "6px",
+                    background: "rgba(255,255,255,0.03)",
+                    borderLeft: `3px solid ${check.severity === "Critical" ? "#ef4444" : check.severity === "High" ? "#f97316" : check.severity === "Medium" ? "#eab308" : "#3b82f6"}`
+                  }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                      <span style={{
+                        fontSize: 10,
+                        fontWeight: 700,
+                        padding: "2px 6px",
+                        borderRadius: "4px",
+                        background: check.severity === "Critical" ? "rgba(239,68,68,0.2)" : check.severity === "High" ? "rgba(249,115,22,0.2)" : check.severity === "Medium" ? "rgba(234,179,8,0.2)" : "rgba(59,130,246,0.2)",
+                        color: check.severity === "Critical" ? "#ef4444" : check.severity === "High" ? "#f97316" : check.severity === "Medium" ? "#eab308" : "#3b82f6"
+                      }}>{check.severity.toUpperCase()}</span>
+                      <span style={{ fontFamily: "JetBrains Mono", fontSize: 11, color: "rgba(255,255,255,0.8)" }}>Claim: {check.claim}</span>
+                    </div>
+                    <p style={{ margin: "0 0 4px 0", fontSize: 12, color: "rgba(255,255,255,0.9)" }}>{check.issue}</p>
+                    <p style={{ margin: 0, fontSize: 11, color: "rgba(255,255,255,0.5)" }}>💡 {check.recommendation}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+
 
           {/* Empty state */}
           {!tokenToDecode && (

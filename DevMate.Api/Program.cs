@@ -237,9 +237,85 @@ app.MapPost("/api/logs/analyze-batch", async (LogBatchAnalysisRequest request, H
 
 }).RequireRateLimiting("IpLimit");
 
+app.MapPost("/api/jwt/analyze", async (JwtAnalysisRequest request, HttpContext context) => {
+    var apiKey = Environment.GetEnvironmentVariable("GROQ_API_KEY");
+    if(string.IsNullOrEmpty(apiKey))
+        return Results.StatusCode(StatusCodes.Status500InternalServerError);
+    var requestJson = JsonSerializer.Serialize(new {
+        Header = request.Header,
+        Payload = request.Payload,
+        SystemChecks = request.DeterministicFindings
+    });
+    
+    var SystemPrompt = @"Sen üst düzey bir Siber Güvenlik Analisti ve Backend Mimarı uzmanısın.
+Amacın, sana verilen JWT (JSON Web Token) Header ve Payload verilerini, frontend sistemimizin tespit ettiği bulguları (SystemChecks) da göz önüne alarak analiz etmek ve güvenlik risklerini değerlendirmektir.
+ÖNEMLİ KURALLAR:
+1. Biz bu sistemde sadece Payload ve Header'ı görüyoruz, KRİPTOGRAFİK İMZA DOĞRULAMASI (Signature Verification) YAPMIYORUZ.
+2. Bu yüzden, ASLA VE ASLA token için 'Geçerlidir', 'Güvenlidir', 'Kullanılabilir' gibi kesin hükümler KURMA. Senin amacın bir 'Güvenlik Doğrulaması' yapmak değil, 'Güvenlik Risk Analizi ve Mimari Öneri' sunmaktır.
+3. SystemChecks içindeki bulguları ezbere tekrarlama; o bulguların backend mimarisinde ne gibi felaketlere (SSRF, Replay Attack vb.) yol açabileceğini detaylandır.
+4. 'RiskLevel' olarak sadece Low, Medium, High veya Critical değerlerinden birini dön.
+BİREBİR aşağıdaki JSON formatında, Markdown karakterleri (```json) kullanmadan, sadece ham JSON objesi olarak Türkçe cevap dön:
+{
+  ""riskLevel"": ""High"",
+  ""summary"": ""Token genel mimari açısından değerlendirildiğinde..."",
+  ""findings"": [
+    {
+      ""severity"": ""Critical"",
+      ""claim"": ""alg"",
+      ""issue"": ""..."",
+      ""recommendation"": ""...""
+    }
+  ]
+}";
+    var openAiRequest = new {
+        model = "openai/gpt-oss-120b",
+        messages = new[] {
+            new { role = "system", content = SystemPrompt },
+            new { role = "user", content = $"İşte analiz edilecek maskelenmiş JWT verileri ve sistem bulguları:\n{requestJson}" }
+        },
+        response_format = new { type = "json_object" },
+        temperature = 0.2
+    };
+
+    using var httpClient = new HttpClient();
+    httpClient.Timeout = TimeSpan.FromSeconds(45);
+    httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiKey}");
+
+    var content = new StringContent(JsonSerializer.Serialize(openAiRequest), Encoding.UTF8, "application/json");
+    HttpResponseMessage openAiResponse;
+
+    try {
+        openAiResponse = await httpClient.PostAsync("https://api.groq.com/openai/v1/chat/completions", content);
+    } catch(TaskCanceledException) {
+        return Results.StatusCode(StatusCodes.Status504GatewayTimeout);    
+    }
+
+    if (!openAiResponse.IsSuccessStatusCode) {
+        return Results.StatusCode(StatusCodes.Status502BadGateway);
+    }
+
+    var jsonString = await openAiResponse.Content.ReadAsStringAsync();
+    using var jsonDoc = JsonDocument.Parse(jsonString);
+    var aiMessage = jsonDoc.RootElement.GetProperty("choices")[0].GetProperty("message").GetProperty("content").GetString();
+
+    if(aiMessage != null) {
+        aiMessage = aiMessage.Replace("```json", "").Replace("```", "").Trim(); 
+    }
+
+    var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+    try {
+        var finalResponse = JsonSerializer.Deserialize<JwtAnalysisResponse>(aiMessage!, options);
+        if (finalResponse == null) throw new JsonException();
+        return Results.Ok(finalResponse);
+    } catch (JsonException) {
+        return Results.StatusCode(StatusCodes.Status500InternalServerError);
+    }
+}).RequireRateLimiting("IpLimit");
 app.Run();
 
 // record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
 // {
 //     public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
 // }
+
+
