@@ -72,18 +72,29 @@ export function isNotBeforeValid(nbf: unknown): boolean {
 export function MaskPii(payload: Record<string, unknown>): Record<string, unknown> {
   const maskedPayload = { ...payload };
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const sensitiveKeys = ['password', 'secret', 'token', 'key', 'ssn'];
 
   for (const key in maskedPayload) {
     const value = maskedPayload[key];
-    if (typeof value === "string") {
+    const lowerKey = key.toLowerCase();
+    const isSensitiveKey = sensitiveKeys.some(sk => lowerKey.includes(sk));
+
+    if (value && typeof value === "object" && !Array.isArray(value)) {
+      maskedPayload[key] = MaskPii(value as Record<string, unknown>);
+    } else if (value && Array.isArray(value)) {
+      maskedPayload[key] = value.map(v => (v && typeof v === 'object' && !Array.isArray(v)) ? MaskPii(v as Record<string, unknown>) : (isSensitiveKey ? "***MASKED***" : v));
+    } else if (typeof value === "string") {
       if (emailRegex.test(value)) {
         maskedPayload[key] = value.replace(/(.{1}).+(@.+)/, "$1***$2");
+      } else if (isSensitiveKey) {
+        maskedPayload[key] = "***MASKED***";
       }
+    } else if (isSensitiveKey) {
+      maskedPayload[key] = "***MASKED***";
     }
   }
 
   return maskedPayload;
-
 }
 
 export function getDeterministicChecks(
@@ -101,28 +112,28 @@ export function getDeterministicChecks(
     });
   } else if (header.alg === "HS256") {
     findings.push({
-      severity: "Medium",
+      severity: "Low",
       claim: "alg",
-      issue: "Simetrik algoritma (HS256) kullanilmis.",
-      recommendation: "Eger token 3. partilere verilebilecekse asimetrik (RS256) kullanilmasi daha guvenlidir."
+      issue: "Simetrik algoritma (HS256) tespiti. Risk göstergesi: Eğer token asimetrik doğrulanması gereken 3. partilere verilecekse risk oluşturabilir.",
+      recommendation: "Gereksinimlere bağlı olarak asimetrik (RS256) kullanılması daha güvenli olabilir."
     });
   }
 
   if (header.kid) {
     findings.push({
-      severity: "High",
+      severity: "Low",
       claim: "kid",
-      issue: "'kid' (Key ID) kullanılmış. Eğer backend bu değeri kontrolsüzce path/URL üretmekte kullanırsa SSRF zafiyeti doğar.",
-      recommendation: "'kid' değerini backend tarafında her zaman statik bir beyaz liste (whitelist) üzerinden doğrulayın."
+      issue: "'kid' (Key ID) mevcut. Risk göstergesi: Eğer backend bu değeri kontrolsüzce path/URL üretmekte kullanırsa SSRF zafiyeti doğabilir.",
+      recommendation: "Kullanım şekline bağlı olarak 'kid' değerini backend tarafında statik bir beyaz liste üzerinden doğrulayın."
     });
   }
 
   if (!payload.jti) {
     findings.push({
-      severity: "Medium",
+      severity: "Low",
       claim: "jti",
-      issue: "Token da 'jti' bulunmuyor. Calismasi durumunda suresi dolana kadar tekrar kullanilabilir (Replay Attack).",
-      recommendation: "Her token'a benzersiz bir JTI ekleyin ve backend'de kara liste / nonce kontrolu yapin."
+      issue: "Token'da 'jti' bulunmuyor. Risk göstergesi: Token iptal gerektiren bir senaryoda kullanılıyorsa Replay Attack'e açık olabilir.",
+      recommendation: "Kullanım durumuna göre her token'a benzersiz bir JTI ekleyin ve backend'de nonce kontrolü yapın."
     });
   }
 

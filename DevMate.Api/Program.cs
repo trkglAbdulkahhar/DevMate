@@ -153,6 +153,10 @@ app.MapPost("/api/analyze", async (AnalysisRequest request , HttpContext context
 }).RequireRateLimiting("IpLimit");
 
 
+
+
+
+
 app.MapPost("/api/logs/analyze-batch", async (LogBatchAnalysisRequest request, HttpContext context) =>{
     if (request.Logs.Count > 50){
         return Results.BadRequest("Sistem güvenliği gereği tek seferde en fazla 50 log analize gönderilebilir.");
@@ -237,6 +241,11 @@ app.MapPost("/api/logs/analyze-batch", async (LogBatchAnalysisRequest request, H
 
 }).RequireRateLimiting("IpLimit");
 
+
+
+
+
+
 app.MapPost("/api/jwt/analyze", async (JwtAnalysisRequest request, HttpContext context) => {
     var apiKey = Environment.GetEnvironmentVariable("GROQ_API_KEY");
     if(string.IsNullOrEmpty(apiKey))
@@ -248,23 +257,23 @@ app.MapPost("/api/jwt/analyze", async (JwtAnalysisRequest request, HttpContext c
     });
     
     var SystemPrompt = @"Sen üst düzey bir Siber Güvenlik Analisti ve Backend Mimarı uzmanısın.
-Amacın, sana verilen JWT (JSON Web Token) Header ve Payload verilerini, frontend sistemimizin tespit ettiği bulguları (SystemChecks) da göz önüne alarak analiz etmek ve güvenlik risklerini değerlendirmektir.
-ÖNEMLİ KURALLAR:
-1. Biz bu sistemde sadece Payload ve Header'ı görüyoruz, KRİPTOGRAFİK İMZA DOĞRULAMASI (Signature Verification) YAPMIYORUZ.
-2. Bu yüzden, ASLA VE ASLA token için 'Geçerlidir', 'Güvenlidir', 'Kullanılabilir' gibi kesin hükümler KURMA. Senin amacın bir 'Güvenlik Doğrulaması' yapmak değil, 'Güvenlik Risk Analizi ve Mimari Öneri' sunmaktır.
-3. SystemChecks içindeki bulguları ezbere tekrarlama; o bulguların backend mimarisinde ne gibi felaketlere (SSRF, Replay Attack vb.) yol açabileceğini detaylandır.
-4. BİREBİR aşağıdaki JSON formatında, Markdown karakterleri (```json) kullanmadan, sadece ham JSON objesi olarak Türkçe cevap dön:
-{
-  ""summary"": ""Token genel mimari açısından değerlendirildiğinde..."",
-  ""findings"": [
-    {
-      ""severity"": ""Critical"",
-      ""claim"": ""alg"",
-      ""issue"": ""..."",
-      ""recommendation"": ""...""
-    }
-  ]
-}";
+            Amacın, sana verilen JWT (JSON Web Token) Header ve Payload verilerini, frontend sistemimizin tespit ettiği bulguları (SystemChecks) da göz önüne alarak analiz etmek ve güvenlik risklerini değerlendirmektir.
+            ÖNEMLİ KURALLAR:
+            1. Biz bu sistemde sadece Payload ve Header'ı görüyoruz, KRİPTOGRAFİK İMZA DOĞRULAMASI (Signature Verification) YAPMIYORUZ.
+            2. Bu yüzden, ASLA VE ASLA token için 'Geçerlidir', 'Güvenlidir', 'Kullanılabilir' gibi kesin hükümler KURMA. Senin amacın bir 'Güvenlik Doğrulaması' yapmak değil, 'Güvenlik Risk Analizi ve Mimari Öneri' sunmaktır.
+            3. SystemChecks içindeki bulguları ezbere tekrarlama; o bulguların backend mimarisinde ne gibi felaketlere (SSRF, Replay Attack vb.) yol açabileceğini detaylandır.
+            4. BİREBİR aşağıdaki JSON formatında, Markdown karakterleri (```json) kullanmadan, sadece ham JSON objesi olarak Türkçe cevap dön:
+            {
+              ""summary"": ""Token genel mimari açısından değerlendirildiğinde..."",
+              ""findings"": [
+                {
+                  ""severity"": ""Critical"",
+                  ""claim"": ""alg"",
+                  ""issue"": ""..."",
+                  ""recommendation"": ""...""
+                }
+              ]
+            }";
     var openAiRequest = new {
         model = "openai/gpt-oss-120b",
         messages = new[] {

@@ -1,7 +1,7 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 
 import { decodeJwt, getDeterministicChecks, MaskPii } from '../utils/jwtDecoder';
-import type { JwtDecodedData, DeterministicFinding } from '../utils/jwtDecoder';
+import type { JwtDecodedData } from '../utils/jwtDecoder';
 
 import { TokenDisplay } from './jwt/TokenDisplay';
 import { JsonViewer } from './jwt/JsonViewer';
@@ -22,7 +22,7 @@ export function JwtDecoderScreen({ onBack }: { onBack: () => void }) {
   const [inputFocused, setInputFocused] = useState(false);
   const [aiInsights, setAiInsights] = useState<any>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [deterministicChecks, setDeterministicChecks] = useState<DeterministicFinding[]>([]);
+
 
   const handleLoadSample = useCallback(() => {
     setToken(SAMPLE_JWT);
@@ -34,7 +34,7 @@ export function JwtDecoderScreen({ onBack }: { onBack: () => void }) {
     setToken("");
     setTokenToDecode("");
     setAiInsights(null);
-    setDeterministicChecks([]);
+
   }, []);
 
   let parsed: JwtDecodedData | null = null;
@@ -43,14 +43,17 @@ export function JwtDecoderScreen({ onBack }: { onBack: () => void }) {
   if (tokenToDecode.trim()) {
     try {
       parsed = decodeJwt(tokenToDecode);
-
-      if (parsed.header && parsed.payload && deterministicChecks.length === 0) {
-        setDeterministicChecks(getDeterministicChecks(parsed.header, parsed.payload));
-      }
     } catch (err: any) {
       decodeError = err.message || "Geçersiz format.";
     }
   }
+
+  const deterministicChecks = useMemo(() => {
+    if (parsed?.valid && parsed.header && parsed.payload) {
+      return getDeterministicChecks(parsed.header, parsed.payload);
+    }
+    return [];
+  }, [parsed?.valid, parsed?.header, parsed?.payload]);
 
   const handleAiAnalysis = async () => {
     if (!parsed?.header || !parsed?.payload) return;
@@ -284,7 +287,6 @@ export function JwtDecoderScreen({ onBack }: { onBack: () => void }) {
             onClick={() => {
               setTokenToDecode(token);
               setAiInsights(null);
-              setDeterministicChecks([]);
             }}
             className="decode-btn"
           >
