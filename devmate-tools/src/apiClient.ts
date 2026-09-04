@@ -7,7 +7,7 @@ const getApiUrl = () => {
   if (typeof process !== 'undefined' && process.env && process.env.DEVMATE_API_URL) {
     return process.env.DEVMATE_API_URL;
   }
-  return 'http://localhost:5242';
+  return 'https://devmate-8rux.onrender.com';
 };
 
 /**
