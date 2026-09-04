@@ -1,0 +1,26 @@
+{
+  "name": "devmate-tools",
+  "version": "1.0.0",
+  "description": "DevMate Security Analysis Tools and CLI",
+  "main": "dist/apiClient.js",
+  "types": "dist/apiClient.d.ts",
+  "bin": {
+    "devmate": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "devmate",
+    "jwt",
+    "log",
+    "security"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^22.5.4",
+    "typescript": "^5.5.4"
+  }
+}

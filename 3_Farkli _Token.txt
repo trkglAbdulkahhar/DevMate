@@ -1,0 +1,16 @@
+Bu token asimetrik (RS256) ile imzalanmıştır, jti barındırır ve süresi geçmemiştir. Sistemin yeşil ve temiz çalıştığını göstermek içindir.
+
+
+eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyXzEyMzQ1NiIsImlzcyI6ImF1dGgubXlhcHAuaW8iLCJpYXQiOjE3MTQwMDAwMDAsIm5iZiI6MTcxNDAwMDAwMCwiZXhwIjoxODAwMDAwMDAwLCJuYW1lIjoiQWxleCBDaGVuIiwianRpIjoidW5pcXVlLWlkLTEyMyJ9.mock_signature
+
+
+Bu token bilerek süresi 2017'de bitecek şekilde (exp) ayarlanmıştır ve jti (benzersiz ID) parametresi silinmiştir. Sistemin "EXPIRED" uyarısını ve yapay zekanın "Replay Attack (Tekrar Kullanım)" riskini nasıl yakaladığını göstermek içindir.
+
+
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyXzc4OSIsImlhdCI6MTUwMDAwMDAwMCwiZXhwIjoxNTAwMDAzNjAwLCJyb2xlIjoidXNlciJ9.mock_signature
+
+
+Bu token'ın Header kısmına tehlikeli bir kid (../../../../etc/passwd) eklenmiştir. Ayrıca Payload kısmında email, password ve ssn gibi son derece hassas kişisel veriler vardır. Yapay zekanın LFI/SSRF riskini tespit ettiğini ve yazdığımız MaskPii fonksiyonunun şifreleri nasıl yıldızladığını (***MASKED***) canlı olarak göstermek içindir.
+
+
+eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Ii4uLy4uLy4uLy4uL2V0Yy9wYXNzd2QifQ.eyJzdWIiOiJhZG1pbl8wMDEiLCJlbWFpbCI6ImFkbWluQGNvbXBhbnkuY29tIiwicGFzc3dvcmQiOiJzdXBlcl9zZWNyZXRfcGFzc3dvcmRfMTIzIiwic3NuIjoiMTIzLTQ1LTY3OCIsImp0aSI6InNlY3VyZS1pZC05OTkiLCJleHAiOjE5MDAwMDAwMDB9.mock_signature
