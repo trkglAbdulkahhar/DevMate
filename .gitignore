@@ -31,3 +31,11 @@ appsettings.json
 
 bin
 obj
+
+# Test Data Files
+Eski_Json.json
+Yeni_Json.json
+Log_Verisi.txt
+3_Farkli _Token.txt
+200+_Satir.txt
+*.log
